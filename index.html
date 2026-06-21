@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>WSRP · Законодательство</title>
     
     <link href="https://fonts.cdnfonts.com/css/erzieherisch" rel="stylesheet">
@@ -22,29 +22,24 @@
             color: var(--text-secondary);
             font-family: inherit;
             font-size: 0.85rem;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         .btn-rounded:hover {
             background: var(--bg-hover);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
+        .btn-rounded:active {
+            transform: scale(0.96);
+        }
         .btn-rounded.active {
             background: var(--text-secondary);
             border-color: var(--text-secondary);
             color: white;
         }
-        .btn-rounded-primary {
-            background: #3a6b8f;
-            border-color: #3a6b8f;
-            color: white;
-        }
-        .btn-rounded-primary:hover {
-            background: #2d5a7a;
-            border-color: #2d5a7a;
-            color: white;
-        }
 
-        /* ===== ЭКРАН ЗАГРУЗКИ С КАПЛЕЙ ===== */
+        /* ===== ЭКРАН ЗАГРУЗКИ ===== */
         #loading-screen {
             position: fixed;
             top: 0;
@@ -67,7 +62,6 @@
             visibility: hidden;
         }
 
-        /* Анимированные частицы фона */
         .loader-bg-particles {
             position: absolute;
             top: 0;
@@ -88,23 +82,12 @@
         }
 
         @keyframes floatParticle {
-            0% {
-                transform: translateY(100vh) scale(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) scale(1);
-                opacity: 0;
-            }
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
         }
 
-        /* ===== КАПЛЯ (крутящийся спиннер) ===== */
         .loader-drop-container {
             position: relative;
             width: 80px;
@@ -140,36 +123,17 @@
         }
 
         @keyframes dropSway {
-            0%, 100% {
-                transform: translateX(-50%) rotate(-3deg) scale(1);
-                border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            }
-            25% {
-                transform: translateX(-60%) rotate(-8deg) scale(1.02);
-                border-radius: 45% 55% 50% 50% / 55% 60% 40% 45%;
-            }
-            50% {
-                transform: translateX(-50%) rotate(0deg) scale(1);
-                border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            }
-            75% {
-                transform: translateX(-40%) rotate(8deg) scale(1.02);
-                border-radius: 55% 45% 50% 50% / 60% 55% 45% 40%;
-            }
+            0%, 100% { transform: translateX(-50%) rotate(-3deg) scale(1); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; }
+            25% { transform: translateX(-60%) rotate(-8deg) scale(1.02); border-radius: 45% 55% 50% 50% / 55% 60% 40% 45%; }
+            50% { transform: translateX(-50%) rotate(0deg) scale(1); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; }
+            75% { transform: translateX(-40%) rotate(8deg) scale(1.02); border-radius: 55% 45% 50% 50% / 60% 55% 45% 40%; }
         }
 
         @keyframes dropHighlight {
-            0%, 100% {
-                opacity: 0.6;
-                transform: translateX(-50%) scale(1);
-            }
-            50% {
-                opacity: 1;
-                transform: translateX(-50%) scale(1.1);
-            }
+            0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
         }
 
-        /* Вращающаяся обводка вокруг капли */
         .loader-ring {
             position: absolute;
             top: 50%;
@@ -212,9 +176,7 @@
             z-index: 1;
         }
 
-        .loader-logo span {
-            color: #3a6b8f;
-        }
+        .loader-logo span { color: #3a6b8f; }
 
         @keyframes pulseLogo {
             0%, 100% { transform: scale(1); opacity: 1; text-shadow: 0 0 60px rgba(58, 107, 143, 0.4); }
@@ -224,6 +186,7 @@
         .loader-progress {
             margin-top: 1.5rem;
             width: 300px;
+            max-width: 80%;
             height: 3px;
             background: rgba(255, 255, 255, 0.08);
             border-radius: 10px;
@@ -284,7 +247,7 @@
             40% { transform: scale(1); opacity: 1; }
         }
 
-        /* ===== CSS-переменные для светлой/тёмной темы ===== */
+        /* ===== CSS-переменные ===== */
         :root {
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
@@ -338,34 +301,35 @@
         body {
             background: var(--bg-primary);
             font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-            padding: 2rem 1.5rem;
+            padding: 1rem 0.8rem;
             color: var(--text-primary);
             line-height: 1.5;
-            transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
-                        color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-text-size-adjust: 100%;
         }
 
         .container { max-width: 1440px; margin: 0 auto; }
         
         .header {
             display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 1rem 2rem; margin-bottom: 2rem;
-            border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;
-            transition: border-color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-wrap: wrap; gap: 0.8rem 1rem; margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;
+            transition: border-color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .logo h1 { 
             font-family: 'Erzieherisch', sans-serif;
             font-weight: 400;
-            font-size: 2rem;
+            font-size: 1.6rem;
             letter-spacing: 0.03em;
             color: var(--text-primary);
-            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .logo h1 .wsrp { color: #3a6b8f; }
         .logo h1 .life {
             color: var(--text-secondary);
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-family: 'Inter', system-ui, sans-serif;
             font-weight: 300;
             letter-spacing: 0.05em;
@@ -375,53 +339,55 @@
         .header-controls {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .badge { 
             background: var(--badge-bg); 
-            padding: 0.4rem 1rem; 
+            padding: 0.3rem 0.8rem; 
             border-radius: 8px;
-            font-size: 0.85rem; 
+            font-size: 0.75rem; 
             font-weight: 500; 
             color: var(--text-secondary); 
             border: 1px solid var(--border-color);
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
         }
 
         #themeToggle {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 0.4rem 1.2rem;
+            padding: 0.3rem 1rem;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: var(--text-primary);
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            white-space: nowrap;
         }
-        #themeToggle:hover {
-            background: var(--bg-hover);
-            transform: translateY(-1px);
-        }
+        #themeToggle:active { transform: scale(0.95); }
 
         .toolbar { 
-            display: flex; flex-wrap: wrap; gap: 0.75rem 1.2rem; 
-            margin-bottom: 1.5rem; align-items: center; 
+            display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; 
+            margin-bottom: 1rem; align-items: center; 
         }
 
-        .search-wrap { flex: 1 1 240px; position: relative; }
+        .search-wrap { flex: 1 1 200px; position: relative; min-width: 140px; }
         .search-wrap input {
-            width: 100%; padding: 0.6rem 1rem 0.6rem 2.6rem; 
+            width: 100%; padding: 0.6rem 1rem 0.6rem 2.4rem; 
             border: 1px solid var(--filter-border);
             border-radius: 8px;
-            font-size: 0.9rem; 
+            font-size: 0.85rem; 
             background: var(--search-bg); 
             color: var(--text-primary);
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
             outline: none; font-family: inherit;
+            -webkit-appearance: none;
         }
         .search-wrap input:focus { 
             border-color: #3a6b8f; 
@@ -430,78 +396,82 @@
         .search-wrap::before { 
             content: "⌕"; 
             position: absolute; 
-            left: 1rem; 
+            left: 0.8rem; 
             top: 50%; 
             transform: translateY(-50%); 
-            font-size: 1rem; 
+            font-size: 0.9rem; 
             opacity: 0.5; 
             color: var(--text-muted);
-            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Автодополнение */
         .autocomplete-list {
             position: absolute;
-            top: 100%;
+            top: calc(100% + 4px);
             left: 0;
             right: 0;
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
             z-index: 100;
             display: none;
             box-shadow: 0 8px 24px var(--shadow-color);
-            margin-top: 4px;
         }
         .autocomplete-list.show { display: block; }
         .autocomplete-item {
-            padding: 0.6rem 1rem;
+            padding: 0.5rem 0.8rem;
             cursor: pointer;
             transition: background 0.2s;
             color: var(--text-primary);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             border-bottom: 1px solid var(--border-color);
+            -webkit-tap-highlight-color: transparent;
         }
         .autocomplete-item:last-child { border-bottom: none; }
-        .autocomplete-item:hover,
-        .autocomplete-item.active {
-            background: var(--bg-hover);
-        }
-        .autocomplete-item .highlight {
-            background: #ffd700;
-            color: #000;
-            padding: 0.05rem 0.1rem;
-            border-radius: 2px;
-        }
-        [data-theme="dark"] .autocomplete-item .highlight {
-            background: #fbbf24;
-            color: #0d1117;
-        }
+        .autocomplete-item:active { background: var(--bg-hover); }
 
-        .filter-group { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; align-items: center; }
-        .filter-group .btn-rounded { font-size: 0.8rem; padding: 0.4rem 1rem; }
+        /* Фильтры */
+        .filter-group { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 0.3rem 0.5rem; 
+            align-items: center; 
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 0.2rem;
+        }
+        .filter-group .btn-rounded { 
+            font-size: 0.7rem; 
+            padding: 0.3rem 0.8rem; 
+            white-space: nowrap;
+        }
 
         .clear-btn {
             background: transparent; border: none; 
-            color: var(--text-muted); font-size: 0.8rem; 
-            cursor: pointer; padding: 0.3rem 0.8rem; font-family: inherit;
-            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-muted); font-size: 0.75rem; 
+            cursor: pointer; padding: 0.2rem 0.6rem; font-family: inherit;
+            transition: color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
-        .clear-btn:hover { color: var(--text-primary); text-decoration: underline; }
+        .clear-btn:active { transform: scale(0.95); }
 
         .view-toggle {
             display: flex;
-            gap: 4px;
+            gap: 3px;
             background: var(--bg-primary);
             border-radius: 8px;
             padding: 3px;
             border: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
         .view-toggle .btn-rounded {
             border: none;
-            padding: 0.3rem 0.8rem;
-            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.7rem;
             border-radius: 6px !important;
         }
         .view-toggle .btn-rounded.active {
@@ -509,78 +479,94 @@
             color: white;
         }
 
+        /* ===== ТАБЛИЦА (адаптивная) ===== */
         .table-wrapper { 
             background: var(--bg-secondary); 
             border-radius: 8px;
             border: 1px solid var(--border-color); 
             overflow-x: auto; 
+            -webkit-overflow-scrolling: touch;
             box-shadow: 0 4px 20px var(--table-shadow);
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 1rem;
         }
         .table-wrapper.hidden { display: none; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 1100px; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 0.8rem; 
+            min-width: 700px; 
+        }
         
         th { 
-            text-align: left; padding: 1rem 0.8rem; 
+            text-align: left; padding: 0.7rem 0.5rem; 
             background: var(--bg-primary); 
-            font-weight: 600; font-size: 0.75rem; 
+            font-weight: 600; font-size: 0.65rem; 
             text-transform: uppercase; letter-spacing: 0.03em; 
             color: var(--text-secondary); 
             border-bottom: 1px solid var(--border-color); 
             white-space: nowrap;
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             user-select: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-        th:hover { background: var(--bg-hover); }
+        th:active { transform: scale(0.98); }
         th .sort-icon {
             display: inline-block;
-            margin-left: 4px;
+            margin-left: 2px;
             opacity: 0.4;
             transition: transform 0.3s;
+            font-size: 0.6rem;
         }
         th.sorted .sort-icon { opacity: 1; }
         th.sorted-asc .sort-icon { transform: rotate(0deg); }
         th.sorted-desc .sort-icon { transform: rotate(180deg); }
 
         td { 
-            padding: 0.8rem; 
+            padding: 0.6rem 0.5rem; 
             border-bottom: 1px solid var(--border-color); 
             vertical-align: top; 
             color: var(--text-primary);
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.78rem;
+            word-break: break-word;
         }
         tr:last-child td { border-bottom: none; }
 
         @keyframes fadeInRow {
-            from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+            from { opacity: 0; transform: translateY(-8px) scale(0.98); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .row-animate {
-            animation: fadeInRow 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: fadeInRow 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
         .code-cell { 
             font-weight: 500; 
             color: var(--code-color); 
             white-space: nowrap;
-            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.7rem;
         }
 
+        /* ===== БЕЙДЖИ ===== */
         .type-badge { 
             display: inline-block; 
-            font-size: 0.65rem; 
+            font-size: 0.55rem; 
             font-weight: 700; 
-            padding: 0.25rem 0.8rem; 
+            padding: 0.15rem 0.5rem; 
             border-radius: 6px;
             text-transform: uppercase; 
             letter-spacing: 0.03em; 
             white-space: nowrap;
             color: #fff;
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             text-shadow: 0 1px 2px rgba(0,0,0,0.15);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
         .type-badge.felony { background: var(--badge-felony-bg-solid); }
         .type-badge.wobbler { background: var(--badge-wobbler-bg-solid); }
@@ -591,32 +577,34 @@
         .highlight {
             background: #ffd700;
             color: #000;
-            padding: 0.05rem 0.15rem;
+            padding: 0.05rem 0.1rem;
             border-radius: 2px;
             font-weight: 600;
         }
         [data-theme="dark"] .highlight { background: #fbbf24; color: #0d1117; }
 
         .action-cell a { 
-            display: inline-block; padding: 0.2rem 0.9rem; 
+            display: inline-block; padding: 0.15rem 0.6rem; 
             background: var(--badge-bg); 
             border-radius: 6px;
-            font-size: 0.7rem; font-weight: 500; 
-            color: var(--text-secondary); text-decoration: none; 
+            font-size: 0.65rem; 
+            font-weight: 500; 
+            color: var(--text-secondary); 
+            text-decoration: none; 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            border: 1px solid transparent; white-space: nowrap;
+            border: 1px solid transparent; 
+            white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
         }
-        .action-cell a:hover { 
-            background: var(--bg-hover); 
-            border-color: var(--border-color); 
-        }
+        .action-cell a:active { transform: scale(0.95); }
 
         /* ===== КАРТОЧКИ ===== */
         .cards-view {
             display: none;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1rem;
-            padding: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.8rem;
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
         }
         .cards-view.show { display: grid; }
 
@@ -624,80 +612,123 @@
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 1.2rem;
+            padding: 1rem;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px var(--shadow-color);
-            animation: fadeInRow 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: fadeInRow 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
-        .law-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px var(--shadow-color);
-        }
+        .law-card:active { transform: scale(0.98); }
         .law-card .card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
         .law-card .card-code {
             font-family: 'Erzieherisch', sans-serif;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             color: #3a6b8f;
         }
         .law-card .card-title {
             font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
             color: var(--text-primary);
         }
         .law-card .card-desc {
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             color: var(--text-muted);
             line-height: 1.5;
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.6rem;
         }
         .law-card .card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.3rem;
         }
 
         .empty-state { 
-            text-align: center; padding: 3rem 1.5rem; 
-            color: var(--empty-text); font-size: 0.95rem; 
-            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center; padding: 2rem 1rem; 
+            color: var(--empty-text); font-size: 0.85rem; 
+            transition: color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             grid-column: 1 / -1;
         }
 
+        /* ===== ПАГИНАЦИЯ ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+            padding: 0.5rem;
+        }
+        .pagination .btn-rounded {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+            min-width: 36px;
+            text-align: center;
+        }
+        .pagination .btn-rounded.active-page {
+            background: #3a6b8f;
+            border-color: #3a6b8f;
+            color: white;
+        }
+        .pagination .btn-rounded:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .pagination-info {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            padding: 0.3rem 0.8rem;
+        }
+        .pagination .per-page-select {
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
         .stats { 
-            margin-top: 1rem; font-size: 0.8rem; 
+            margin-top: 0.8rem; 
+            font-size: 0.7rem; 
             color: var(--text-muted); 
-            display: flex; justify-content: space-between; 
-            flex-wrap: wrap; gap: 0.5rem;
-            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; 
+            justify-content: space-between; 
+            flex-wrap: wrap; 
+            gap: 0.3rem;
+            transition: color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .stats span { 
             background: var(--badge-bg); 
-            padding: 0.2rem 0.9rem; 
+            padding: 0.15rem 0.6rem; 
             border-radius: 6px;
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* ===== КНОПКА "НАВЕРХ" ===== */
         #backToTop {
             position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 48px;
-            height: 48px;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 44px;
+            height: 44px;
             border-radius: 8px;
             border: none;
             background: #3a6b8f;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
             box-shadow: 0 4px 16px rgba(58, 107, 143, 0.3);
             transition: all 0.3s ease;
@@ -706,40 +737,79 @@
             transform: translateY(20px);
             z-index: 999;
             font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         #backToTop.show {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
-        #backToTop:hover {
-            background: #2d5a7a;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(58, 107, 143, 0.4);
-        }
+        #backToTop:active { transform: scale(0.9); }
 
+        /* ===== МОБИЛЬНЫЕ АДАПТАЦИИ ===== */
         @media (max-width: 768px) {
-            body { padding: 1rem 0.8rem; }
-            .header { flex-direction: column; align-items: flex-start; }
-            .header-controls { width: 100%; justify-content: space-between; }
-            .toolbar { flex-direction: column; align-items: stretch; }
-            .filter-group { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 0.4rem; }
+            body { padding: 0.6rem 0.4rem; }
             
-            .logo h1 { font-size: 1.5rem; }
-            .logo h1 .life { font-size: 1.1rem; }
+            .header { flex-direction: row; flex-wrap: wrap; gap: 0.5rem; }
+            .logo h1 { font-size: 1.3rem; }
+            .logo h1 .life { font-size: 1rem; }
+            .badge { font-size: 0.6rem; padding: 0.2rem 0.5rem; }
+            #themeToggle { font-size: 0.7rem; padding: 0.2rem 0.7rem; }
             
-            .cards-view { grid-template-columns: 1fr; }
+            .toolbar { gap: 0.4rem; }
+            .search-wrap { flex: 1 1 100%; min-width: unset; }
+            .search-wrap input { font-size: 0.8rem; padding: 0.5rem 1rem 0.5rem 2rem; }
             
-            .loader-logo { font-size: 2.8rem; }
-            .loader-progress { width: 80%; }
-            .loader-drop-container { transform: scale(0.7); }
+            .filter-group { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.3rem; }
+            .filter-group .btn-rounded { font-size: 0.65rem; padding: 0.25rem 0.6rem; flex-shrink: 0; }
             
-            #backToTop { bottom: 1rem; right: 1rem; width: 40px; height: 40px; font-size: 1.2rem; }
+            .view-toggle .btn-rounded { font-size: 0.6rem; padding: 0.2rem 0.4rem; }
+            .clear-btn { font-size: 0.65rem; }
+            
+            table { font-size: 0.7rem; min-width: 600px; }
+            th { font-size: 0.55rem; padding: 0.4rem 0.3rem; }
+            td { font-size: 0.65rem; padding: 0.4rem 0.3rem; }
+            .code-cell { font-size: 0.6rem; }
+            .type-badge { font-size: 0.5rem; padding: 0.1rem 0.4rem; }
+            .action-cell a { font-size: 0.55rem; padding: 0.1rem 0.4rem; }
+            
+            .cards-view { grid-template-columns: 1fr; gap: 0.6rem; }
+            
+            .loader-logo { font-size: 2.5rem; }
+            .loader-drop-container { transform: scale(0.6); }
+            .loader-progress { width: 90%; }
+            
+            #backToTop { bottom: 1rem; right: 1rem; width: 38px; height: 38px; font-size: 1rem; }
+            
+            .stats { font-size: 0.6rem; }
+            .stats span { padding: 0.1rem 0.4rem; }
+            
+            .pagination .btn-rounded { padding: 0.2rem 0.5rem; font-size: 0.65rem; min-width: 30px; }
+            .pagination-info { font-size: 0.65rem; }
         }
 
         @media (max-width: 480px) {
-            .loader-logo { font-size: 2.2rem; }
-            .loader-drop-container { transform: scale(0.5); }
+            .logo h1 { font-size: 1.1rem; }
+            .logo h1 .life { font-size: 0.85rem; }
+            .header-controls .badge { display: none; }
+            
+            .filter-group .btn-rounded { font-size: 0.55rem; padding: 0.2rem 0.5rem; }
+            
+            table { font-size: 0.6rem; min-width: 500px; }
+            th { font-size: 0.5rem; padding: 0.3rem 0.2rem; }
+            td { font-size: 0.55rem; padding: 0.3rem 0.2rem; }
+            .code-cell { font-size: 0.5rem; }
+            .type-badge { font-size: 0.45rem; padding: 0.05rem 0.3rem; }
+            .action-cell a { font-size: 0.5rem; padding: 0.1rem 0.3rem; }
+            
+            .loader-logo { font-size: 2rem; }
+        }
+
+        @media (max-width: 380px) {
+            .header { flex-direction: column; align-items: flex-start; }
+            .header-controls { width: 100%; justify-content: space-between; }
+            .header-controls .badge { display: none; }
         }
     </style>
 </head>
@@ -748,19 +818,15 @@
 <!-- ===== ЭКРАН ЗАГРУЗКИ ===== -->
 <div id="loading-screen">
     <div class="loader-bg-particles" id="particles"></div>
-    
     <div class="loader-drop-container">
         <div class="loader-ring"></div>
         <div class="loader-drop"></div>
     </div>
-    
     <div class="loader-logo">WSRP<span>.</span>life</div>
-    
     <div class="loader-progress">
         <div class="loader-progress-bar" id="progressBar"></div>
     </div>
     <div class="loader-percent" id="percentText">0%</div>
-    
     <div class="loader-dots">
         <div class="loader-dot"></div>
         <div class="loader-dot"></div>
@@ -777,14 +843,14 @@
             <h1><span class="wsrp">WSRP</span><span class="dot">·</span><span class="life">life</span></h1>
         </div>
         <div class="header-controls">
-            <div class="badge">⚖ Законы штата · Федеральные</div>
+            <div class="badge">Законы штата · Федеральные</div>
             <button id="themeToggle" class="btn-rounded">Тёмная</button>
         </div>
     </div>
 
     <div class="toolbar">
         <div class="search-wrap">
-            <input type="text" id="searchInput" placeholder="Поиск по названию, описанию, номеру..." autocomplete="off">
+            <input type="text" id="searchInput" placeholder="Поиск..." autocomplete="off">
             <div class="autocomplete-list" id="autocompleteList"></div>
         </div>
         <div class="filter-group" id="typeFilters">
@@ -821,6 +887,20 @@
 
     <div class="cards-view" id="cardsView"></div>
 
+    <!-- ===== ПАГИНАЦИЯ ===== -->
+    <div class="pagination" id="pagination">
+        <button class="btn-rounded" id="prevPage" disabled>Назад</button>
+        <span class="pagination-info" id="pageInfo">Страница 1 из 1</span>
+        <button class="btn-rounded" id="nextPage" disabled>Вперёд</button>
+        <select class="per-page-select" id="perPageSelect">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="0">Все</option>
+        </select>
+    </div>
+
     <div class="stats">
         <span id="rowCount">Записей: 0</span>
         <span id="filterHint">Показаны все</span>
@@ -830,12 +910,12 @@
 <button id="backToTop" title="Наверх">↑</button>
 
 <script>
-    // --------------------------------------------------------------
+    // ============================================================
     // ЭКРАН ЗАГРУЗКИ
-    // --------------------------------------------------------------
+    // ============================================================
     (function showLoadingScreen() {
         const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 25; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             particle.style.left = Math.random() * 100 + '%';
@@ -862,21 +942,16 @@
                     loadingScreen.classList.add('hidden');
                     mainContent.style.display = 'block';
                     setTimeout(renderTable, 100);
-                    setTimeout(() => {
-                        document.querySelectorAll('.row-animate').forEach((el, i) => {
-                            el.style.animationDelay = (i * 30) + 'ms';
-                        });
-                    }, 200);
-                }, 600);
+                }, 500);
             }
             progressBar.style.width = progress + '%';
             percentText.textContent = Math.round(progress) + '%';
-        }, 120);
+        }, 100);
     })();
 
-    // --------------------------------------------------------------
-    // БАЗА ДАННЫХ ЗАКОНОВ (сокращённая)
-    // --------------------------------------------------------------
+    // ============================================================
+    // БАЗА ДАННЫХ ЗАКОНОВ
+    // ============================================================
     const rawData = `CFR|36|§ 2.1|Сохранение природных ресурсов|MISDEMEANOR|Запрещается повреждать/уничтожать растения, животных и природные объекты в нацпарках. До 6 месяцев или штраф (до ~$5,000).|https://www.ecfr.gov/current/title-36/chapter-I/part-2/section-2.1
 CFR|36|§ 2.2|Защита дикой природы|MISDEMEANOR|Охота, отлов или умышленное беспокойство диких животных без разрешения. До 6 месяцев, штраф до ~$5,000.|https://www.ecfr.gov/current/title-36/chapter-I/part-2/section-2.2
 CFR|36|§ 2.4|Оружие и взрывчатые вещества|MISDEMEANOR|Незаконное ношение/хранение/использование оружия, ловушек, взрывчатки в парках. До 6 месяцев.|https://www.ecfr.gov/current/title-36/chapter-I/part-2/section-2.4
@@ -1343,9 +1418,9 @@ USC|26|§ 5841|Регистрация оружия (NFA)|INFO|Националь
 USC|26|§ 5861|Незаконное владение незарегистрированным оружием|FELONY|Производство/владение/сбыт оружия, подлежащего регистрации по NFA, без учёта. До 10 лет.|https://www.law.cornell.edu/uscode/text/26/5861
 USC|49|§ 46314|Незаконное проникновение на борт воздушного судна или в зону аэропорта|WOBBLER|Умышленное проникновение в самолёт или охраняемую зону аэропорта в нарушение требований авиационной безопасности. До 1 года; Если с умыслом уклониться от процедур досмотра, либо совершить тяжкое преступление на борту или в зоне аэропорта — до 10 лет.|https://www.law.cornell.edu/uscode/text/49/46314`;
 
-    // --------------------------------------------------------------
+    // ============================================================
     // Парсер
-    // --------------------------------------------------------------
+    // ============================================================
     const laws = rawData.trim().split('\n').filter(line => line).map(line => {
         const p = line.split('|');
         return {
@@ -1359,9 +1434,21 @@ USC|49|§ 46314|Незаконное проникновение на борт в
         };
     });
 
-    // --------------------------------------------------------------
-    // Рендер
-    // --------------------------------------------------------------
+    // ============================================================
+    // Состояние
+    // ============================================================
+    let currentFilter = 'all';
+    let currentSearch = '';
+    let currentView = 'table';
+    let sortField = '';
+    let sortOrder = 'asc';
+    let currentPage = 1;
+    let perPage = 20;
+    let allFiltered = [];
+
+    // ============================================================
+    // DOM-элементы
+    // ============================================================
     const tbody = document.getElementById('tableBody');
     const searchInput = document.getElementById('searchInput');
     const filterBtns = document.querySelectorAll('.filter-group .btn-rounded');
@@ -1373,14 +1460,19 @@ USC|49|§ 46314|Незаконное проникновение на борт в
     const viewTableBtn = document.getElementById('viewTable');
     const viewCardsBtn = document.getElementById('viewCards');
     const autocompleteList = document.getElementById('autocompleteList');
+    const pagination = document.getElementById('pagination');
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    const pageInfo = document.getElementById('pageInfo');
+    const perPageSelect = document.getElementById('perPageSelect');
+    const backToTopBtn = document.getElementById('backToTop');
+    const themeToggle = document.getElementById('themeToggle');
 
-    let currentFilter = 'all';
-    let currentSearch = '';
-    let currentView = 'table';
-    let sortField = '';
-    let sortOrder = 'asc';
-
+    // ============================================================
     // Автодополнение
+    // ============================================================
+    let autocompleteTimeout;
+
     function showAutocomplete(query) {
         if (!query || query.length < 1) {
             autocompleteList.classList.remove('show');
@@ -1411,6 +1503,15 @@ USC|49|§ 46314|Незаконное проникновение на борт в
                 searchInput.value = this.textContent;
                 currentSearch = this.textContent;
                 autocompleteList.classList.remove('show');
+                currentPage = 1;
+                renderTable();
+            });
+            el.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                searchInput.value = this.textContent;
+                currentSearch = this.textContent;
+                autocompleteList.classList.remove('show');
+                currentPage = 1;
                 renderTable();
             });
         });
@@ -1418,7 +1519,9 @@ USC|49|§ 46314|Незаконное проникновение на борт в
 
     searchInput.addEventListener('input', function() {
         currentSearch = this.value;
-        showAutocomplete(this.value);
+        clearTimeout(autocompleteTimeout);
+        autocompleteTimeout = setTimeout(() => showAutocomplete(this.value), 150);
+        currentPage = 1;
         renderTable();
     });
 
@@ -1428,7 +1531,9 @@ USC|49|§ 46314|Незаконное проникновение на борт в
         }
     });
 
+    // ============================================================
     // Виды отображения
+    // ============================================================
     viewTableBtn.addEventListener('click', function() {
         viewTableBtn.classList.add('active');
         viewCardsBtn.classList.remove('active');
@@ -1447,7 +1552,9 @@ USC|49|§ 46314|Незаконное проникновение на борт в
         renderTable();
     });
 
+    // ============================================================
     // Сортировка
+    // ============================================================
     document.querySelectorAll('th[data-sort]').forEach(th => {
         th.addEventListener('click', function() {
             const field = this.dataset.sort;
@@ -1459,17 +1566,21 @@ USC|49|§ 46314|Незаконное проникновение на борт в
             }
             document.querySelectorAll('th[data-sort]').forEach(h => h.classList.remove('sorted', 'sorted-asc', 'sorted-desc'));
             this.classList.add('sorted', `sorted-${sortOrder}`);
+            currentPage = 1;
             renderTable();
         });
     });
 
+    // ============================================================
+    // Функции
+    // ============================================================
     function highlightText(text, query) {
         if (!query || query.trim() === '') return text;
         const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
         return text.replace(regex, '<span class="highlight">$1</span>');
     }
 
-    function renderTable() {
+    function getFilteredData() {
         let filtered = laws.filter(item => {
             if (currentFilter !== 'all' && item.type !== currentFilter) return false;
             if (currentSearch.trim() !== '') {
@@ -1500,10 +1611,28 @@ USC|49|§ 46314|Незаконное проникновение на борт в
                 return 0;
             });
         }
+        return filtered;
+    }
 
-        if (filtered.length === 0) {
-            const emptyMsg = `<div class="empty-state">Ничего не найдено по вашему запросу</div>`;
-            tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Ничего не найдено по вашему запросу</td></tr>`;
+    function renderTable() {
+        allFiltered = getFilteredData();
+        const total = allFiltered.length;
+        const totalPages = perPage === 0 ? 1 : Math.ceil(total / perPage);
+
+        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const start = perPage === 0 ? 0 : (currentPage - 1) * perPage;
+        const end = perPage === 0 ? total : Math.min(start + perPage, total);
+        const pageData = allFiltered.slice(start, end);
+
+        prevPageBtn.disabled = currentPage <= 1;
+        nextPageBtn.disabled = currentPage >= totalPages;
+        pageInfo.textContent = total > 0 ? `Страница ${currentPage} из ${totalPages || 1}` : 'Нет записей';
+
+        if (pageData.length === 0) {
+            const emptyMsg = `<div class="empty-state">Ничего не найдено</div>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Ничего не найдено</td></tr>`;
             cardsView.innerHTML = emptyMsg;
             rowCount.textContent = 'Записей: 0';
             filterHint.textContent = 'Нет совпадений';
@@ -1512,11 +1641,10 @@ USC|49|§ 46314|Незаконное проникновение на борт в
 
         const query = currentSearch.trim();
 
-        // Таблица
         let tableHtml = '';
-        filtered.forEach((item, index) => {
+        pageData.forEach((item, index) => {
             const typeClass = item.type.toLowerCase();
-            const delay = Math.min(index * 25, 300);
+            const delay = Math.min(index * 20, 300);
             
             tableHtml += `<tr class="row-animate" style="animation-delay: ${delay}ms">
                 <td class="code-cell">${query ? highlightText(item.code, query) : item.code}</td>
@@ -1530,11 +1658,10 @@ USC|49|§ 46314|Незаконное проникновение на борт в
         });
         tbody.innerHTML = tableHtml;
 
-        // Карточки
         let cardsHtml = '';
-        filtered.forEach((item, index) => {
+        pageData.forEach((item, index) => {
             const typeClass = item.type.toLowerCase();
-            const delay = Math.min(index * 25, 300);
+            const delay = Math.min(index * 20, 300);
             cardsHtml += `
                 <div class="law-card" style="animation-delay: ${delay}ms">
                     <div class="card-header">
@@ -1544,24 +1671,53 @@ USC|49|§ 46314|Незаконное проникновение на борт в
                     <div class="card-title">${query ? highlightText(item.title, query) : item.title}</div>
                     <div class="card-desc">${query ? highlightText(item.desc, query) : item.desc}</div>
                     <div class="card-footer">
-                        <span style="font-size:0.8rem;color:var(--text-muted);">${item.section}</span>
-                        <a href="${item.link}" target="_blank" style="color:#3a6b8f;text-decoration:none;font-weight:500;">Подробнее →</a>
+                        <span style="font-size:0.7rem;color:var(--text-muted);">${item.section}</span>
+                        <a href="${item.link}" target="_blank" style="color:#3a6b8f;text-decoration:none;font-weight:500;font-size:0.8rem;">Подробнее →</a>
                     </div>
                 </div>
             `;
         });
         cardsView.innerHTML = cardsHtml;
 
-        rowCount.textContent = `Записей: ${filtered.length}`;
+        rowCount.textContent = `Записей: ${total}`;
         filterHint.textContent = currentFilter === 'all' ? 'Показаны все' : `Фильтр: ${currentFilter}`;
     }
 
+    // ============================================================
+    // Пагинация
+    // ============================================================
+    prevPageBtn.addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+
+    nextPageBtn.addEventListener('click', function() {
+        const totalPages = perPage === 0 ? 1 : Math.ceil(allFiltered.length / perPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+
+    perPageSelect.addEventListener('change', function() {
+        perPage = parseInt(this.value);
+        currentPage = 1;
+        renderTable();
+    });
+
+    // ============================================================
     // Фильтры
+    // ============================================================
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             filterBtns.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             currentFilter = this.dataset.type;
+            currentPage = 1;
             renderTable();
         });
     });
@@ -1569,6 +1725,7 @@ USC|49|§ 46314|Незаконное проникновение на борт в
     clearBtn.addEventListener('click', function() {
         searchInput.value = '';
         currentSearch = '';
+        currentPage = 1;
         autocompleteList.classList.remove('show');
         filterBtns.forEach(b => b.classList.remove('active'));
         document.querySelector('.filter-group .btn-rounded[data-type="all"]').classList.add('active');
@@ -1576,21 +1733,34 @@ USC|49|§ 46314|Незаконное проникновение на борт в
         renderTable();
     });
 
+    // ============================================================
     // Кнопка "Наверх"
-    const backToTopBtn = document.getElementById('backToTop');
+    // ============================================================
+    let scrollTimeout;
+
     window.addEventListener('scroll', function() {
-        if (window.scrollY > 300) {
-            backToTopBtn.classList.add('show');
-        } else {
-            backToTopBtn.classList.remove('show');
-        }
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        }, 50);
     });
+
     backToTopBtn.addEventListener('click', function() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
+    backToTopBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ============================================================
     // Тёмная тема
-    const themeToggle = document.getElementById('themeToggle');
+    // ============================================================
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 
     function setTheme(isDark) {
@@ -1622,6 +1792,9 @@ USC|49|§ 46314|Незаконное проникновение на борт в
         setTheme(!isDark);
     });
 
+    // ============================================================
+    // Первичный рендер
+    // ============================================================
     renderTable();
 </script>
 </body>
