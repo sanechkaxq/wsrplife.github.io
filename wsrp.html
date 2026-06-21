@@ -1,0 +1,1628 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WSRP · Законодательство</title>
+    
+    <link href="https://fonts.cdnfonts.com/css/erzieherisch" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* ===== СКРУГЛЁННЫЕ КНОПКИ ===== */
+        .btn-rounded {
+            border-radius: 8px !important;
+            border: 1px solid var(--filter-border);
+            padding: 0.5rem 1.2rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--filter-bg);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .btn-rounded:hover {
+            background: var(--bg-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .btn-rounded.active {
+            background: var(--text-secondary);
+            border-color: var(--text-secondary);
+            color: white;
+        }
+        .btn-rounded-primary {
+            background: #3a6b8f;
+            border-color: #3a6b8f;
+            color: white;
+        }
+        .btn-rounded-primary:hover {
+            background: #2d5a7a;
+            border-color: #2d5a7a;
+            color: white;
+        }
+
+        /* ===== ЭКРАН ЗАГРУЗКИ С КАПЛЕЙ ===== */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0b1b2b;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                        visibility 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Анимированные частицы фона */
+        .loader-bg-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(58, 107, 143, 0.25);
+            border-radius: 50%;
+            animation: floatParticle linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* ===== КАПЛЯ (крутящийся спиннер) ===== */
+        .loader-drop-container {
+            position: relative;
+            width: 80px;
+            height: 100px;
+            margin-bottom: 2rem;
+            z-index: 1;
+        }
+
+        .loader-drop {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 60px;
+            background: linear-gradient(135deg, #3a6b8f, #6a9fc7);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: dropSway 2s ease-in-out infinite;
+            box-shadow: 0 0 40px rgba(58, 107, 143, 0.3);
+        }
+
+        .loader-drop::before {
+            content: '';
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.4), transparent);
+            border-radius: 50%;
+            animation: dropHighlight 2s ease-in-out infinite;
+        }
+
+        @keyframes dropSway {
+            0%, 100% {
+                transform: translateX(-50%) rotate(-3deg) scale(1);
+                border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            }
+            25% {
+                transform: translateX(-60%) rotate(-8deg) scale(1.02);
+                border-radius: 45% 55% 50% 50% / 55% 60% 40% 45%;
+            }
+            50% {
+                transform: translateX(-50%) rotate(0deg) scale(1);
+                border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            }
+            75% {
+                transform: translateX(-40%) rotate(8deg) scale(1.02);
+                border-radius: 55% 45% 50% 50% / 60% 55% 45% 40%;
+            }
+        }
+
+        @keyframes dropHighlight {
+            0%, 100% {
+                opacity: 0.6;
+                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(-50%) scale(1.1);
+            }
+        }
+
+        /* Вращающаяся обводка вокруг капли */
+        .loader-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 2px solid rgba(58, 107, 143, 0.15);
+            border-top: 2px solid #3a6b8f;
+            animation: spinRing 2s linear infinite;
+        }
+
+        .loader-ring::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            border: 1px solid rgba(58, 107, 143, 0.08);
+            animation: spinRing 3s linear infinite reverse;
+        }
+
+        @keyframes spinRing {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .loader-logo {
+            font-family: 'Erzieherisch', sans-serif;
+            font-size: 4rem;
+            color: #fff;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 60px rgba(58, 107, 143, 0.4);
+            animation: pulseLogo 2s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .loader-logo span {
+            color: #3a6b8f;
+        }
+
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); opacity: 1; text-shadow: 0 0 60px rgba(58, 107, 143, 0.4); }
+            50% { transform: scale(1.03); opacity: 0.9; text-shadow: 0 0 100px rgba(58, 107, 143, 0.6); }
+        }
+
+        .loader-progress {
+            margin-top: 1.5rem;
+            width: 300px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .loader-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #3a6b8f, #6a9fc7, #3a6b8f);
+            background-size: 200% 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .loader-percent {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 0.75rem;
+            letter-spacing: 0.15em;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+
+        .loader-dots {
+            display: flex;
+            gap: 8px;
+            margin-top: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .loader-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            animation: dotPulse 1.4s ease-in-out infinite;
+        }
+
+        .loader-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loader-dot:nth-child(3) { animation-delay: 0.4s; }
+        .loader-dot:nth-child(4) { animation-delay: 0.6s; }
+        .loader-dot:nth-child(5) { animation-delay: 0.8s; }
+
+        @keyframes dotPulse {
+            0%, 80%, 100% { transform: scale(0.5); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ===== CSS-переменные для светлой/тёмной темы ===== */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #0b1b2b;
+            --text-secondary: #1e3a5f;
+            --text-muted: #4a617c;
+            --border-color: #e9edf2;
+            --bg-hover: #eef2f7;
+            --shadow-color: rgba(0, 0, 0, 0.02);
+            --badge-bg: #eef2f7;
+            --filter-bg: #ffffff;
+            --filter-border: #dce3ec;
+            --empty-text: #5d738c;
+            --search-bg: #ffffff;
+            --code-color: #0b1b2b;
+            --table-shadow: rgba(0, 0, 0, 0.02);
+            --card-bg: #ffffff;
+            
+            --badge-felony-bg-solid: #dc3545;
+            --badge-wobbler-bg-solid: #fd7e14;
+            --badge-misdemeanor-bg-solid: #ffc107;
+            --badge-infraction-bg-solid: #0d6efd;
+            --badge-info-bg-solid: #6c757d;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --border-color: #30363d;
+            --bg-hover: #1c2333;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --badge-bg: #21262d;
+            --filter-bg: #161b22;
+            --filter-border: #30363d;
+            --empty-text: #8b949e;
+            --search-bg: #0d1117;
+            --code-color: #c9d1d9;
+            --table-shadow: rgba(0, 0, 0, 0.6);
+            --card-bg: #161b22;
+            
+            --badge-felony-bg-solid: #c82333;
+            --badge-wobbler-bg-solid: #e06b00;
+            --badge-misdemeanor-bg-solid: #d4a000;
+            --badge-infraction-bg-solid: #0b5ed7;
+            --badge-info-bg-solid: #5a6268;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 2rem 1.5rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+            transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .container { max-width: 1440px; margin: 0 auto; }
+        
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 1rem 2rem; margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;
+            transition: border-color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo h1 { 
+            font-family: 'Erzieherisch', sans-serif;
+            font-weight: 400;
+            font-size: 2rem;
+            letter-spacing: 0.03em;
+            color: var(--text-primary);
+            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .logo h1 .wsrp { color: #3a6b8f; }
+        .logo h1 .life {
+            color: var(--text-secondary);
+            font-size: 1.4rem;
+            font-family: 'Inter', system-ui, sans-serif;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+        }
+        .logo h1 .dot { color: #3a6b8f; font-weight: 700; }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge { 
+            background: var(--badge-bg); 
+            padding: 0.4rem 1rem; 
+            border-radius: 8px;
+            font-size: 0.85rem; 
+            font-weight: 500; 
+            color: var(--text-secondary); 
+            border: 1px solid var(--border-color);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #themeToggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.4rem 1.2rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+        }
+        #themeToggle:hover {
+            background: var(--bg-hover);
+            transform: translateY(-1px);
+        }
+
+        .toolbar { 
+            display: flex; flex-wrap: wrap; gap: 0.75rem 1.2rem; 
+            margin-bottom: 1.5rem; align-items: center; 
+        }
+
+        .search-wrap { flex: 1 1 240px; position: relative; }
+        .search-wrap input {
+            width: 100%; padding: 0.6rem 1rem 0.6rem 2.6rem; 
+            border: 1px solid var(--filter-border);
+            border-radius: 8px;
+            font-size: 0.9rem; 
+            background: var(--search-bg); 
+            color: var(--text-primary);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
+            outline: none; font-family: inherit;
+        }
+        .search-wrap input:focus { 
+            border-color: #3a6b8f; 
+            box-shadow: 0 0 0 3px rgba(58, 107, 143, 0.15); 
+        }
+        .search-wrap::before { 
+            content: "⌕"; 
+            position: absolute; 
+            left: 1rem; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            font-size: 1rem; 
+            opacity: 0.5; 
+            color: var(--text-muted);
+            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 8px 24px var(--shadow-color);
+            margin-top: 4px;
+        }
+        .autocomplete-list.show { display: block; }
+        .autocomplete-item {
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover,
+        .autocomplete-item.active {
+            background: var(--bg-hover);
+        }
+        .autocomplete-item .highlight {
+            background: #ffd700;
+            color: #000;
+            padding: 0.05rem 0.1rem;
+            border-radius: 2px;
+        }
+        [data-theme="dark"] .autocomplete-item .highlight {
+            background: #fbbf24;
+            color: #0d1117;
+        }
+
+        .filter-group { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; align-items: center; }
+        .filter-group .btn-rounded { font-size: 0.8rem; padding: 0.4rem 1rem; }
+
+        .clear-btn {
+            background: transparent; border: none; 
+            color: var(--text-muted); font-size: 0.8rem; 
+            cursor: pointer; padding: 0.3rem 0.8rem; font-family: inherit;
+            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .clear-btn:hover { color: var(--text-primary); text-decoration: underline; }
+
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 3px;
+            border: 1px solid var(--border-color);
+        }
+        .view-toggle .btn-rounded {
+            border: none;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+            border-radius: 6px !important;
+        }
+        .view-toggle .btn-rounded.active {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        .table-wrapper { 
+            background: var(--bg-secondary); 
+            border-radius: 8px;
+            border: 1px solid var(--border-color); 
+            overflow-x: auto; 
+            box-shadow: 0 4px 20px var(--table-shadow);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .table-wrapper.hidden { display: none; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 1100px; }
+        
+        th { 
+            text-align: left; padding: 1rem 0.8rem; 
+            background: var(--bg-primary); 
+            font-weight: 600; font-size: 0.75rem; 
+            text-transform: uppercase; letter-spacing: 0.03em; 
+            color: var(--text-secondary); 
+            border-bottom: 1px solid var(--border-color); 
+            white-space: nowrap;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            user-select: none;
+        }
+        th:hover { background: var(--bg-hover); }
+        th .sort-icon {
+            display: inline-block;
+            margin-left: 4px;
+            opacity: 0.4;
+            transition: transform 0.3s;
+        }
+        th.sorted .sort-icon { opacity: 1; }
+        th.sorted-asc .sort-icon { transform: rotate(0deg); }
+        th.sorted-desc .sort-icon { transform: rotate(180deg); }
+
+        td { 
+            padding: 0.8rem; 
+            border-bottom: 1px solid var(--border-color); 
+            vertical-align: top; 
+            color: var(--text-primary);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        tr:last-child td { border-bottom: none; }
+
+        @keyframes fadeInRow {
+            from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .row-animate {
+            animation: fadeInRow 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .code-cell { 
+            font-weight: 500; 
+            color: var(--code-color); 
+            white-space: nowrap;
+            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .type-badge { 
+            display: inline-block; 
+            font-size: 0.65rem; 
+            font-weight: 700; 
+            padding: 0.25rem 0.8rem; 
+            border-radius: 6px;
+            text-transform: uppercase; 
+            letter-spacing: 0.03em; 
+            white-space: nowrap;
+            color: #fff;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        .type-badge.felony { background: var(--badge-felony-bg-solid); }
+        .type-badge.wobbler { background: var(--badge-wobbler-bg-solid); }
+        .type-badge.misdemeanor { background: var(--badge-misdemeanor-bg-solid); color: #212529; text-shadow: none; }
+        .type-badge.infraction { background: var(--badge-infraction-bg-solid); }
+        .type-badge.info { background: var(--badge-info-bg-solid); }
+
+        .highlight {
+            background: #ffd700;
+            color: #000;
+            padding: 0.05rem 0.15rem;
+            border-radius: 2px;
+            font-weight: 600;
+        }
+        [data-theme="dark"] .highlight { background: #fbbf24; color: #0d1117; }
+
+        .action-cell a { 
+            display: inline-block; padding: 0.2rem 0.9rem; 
+            background: var(--badge-bg); 
+            border-radius: 6px;
+            font-size: 0.7rem; font-weight: 500; 
+            color: var(--text-secondary); text-decoration: none; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            border: 1px solid transparent; white-space: nowrap;
+        }
+        .action-cell a:hover { 
+            background: var(--bg-hover); 
+            border-color: var(--border-color); 
+        }
+
+        /* ===== КАРТОЧКИ ===== */
+        .cards-view {
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .cards-view.show { display: grid; }
+
+        .law-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            animation: fadeInRow 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .law-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px var(--shadow-color);
+        }
+        .law-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+            gap: 0.5rem;
+        }
+        .law-card .card-code {
+            font-family: 'Erzieherisch', sans-serif;
+            font-size: 1.1rem;
+            color: #3a6b8f;
+        }
+        .law-card .card-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+        }
+        .law-card .card-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 0.8rem;
+        }
+        .law-card .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .empty-state { 
+            text-align: center; padding: 3rem 1.5rem; 
+            color: var(--empty-text); font-size: 0.95rem; 
+            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            grid-column: 1 / -1;
+        }
+
+        .stats { 
+            margin-top: 1rem; font-size: 0.8rem; 
+            color: var(--text-muted); 
+            display: flex; justify-content: space-between; 
+            flex-wrap: wrap; gap: 0.5rem;
+            transition: color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .stats span { 
+            background: var(--badge-bg); 
+            padding: 0.2rem 0.9rem; 
+            border-radius: 6px;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ===== КНОПКА "НАВЕРХ" ===== */
+        #backToTop {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            border: none;
+            background: #3a6b8f;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(58, 107, 143, 0.3);
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            z-index: 999;
+            font-family: inherit;
+        }
+        #backToTop.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        #backToTop:hover {
+            background: #2d5a7a;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(58, 107, 143, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 1rem 0.8rem; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .header-controls { width: 100%; justify-content: space-between; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .filter-group { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 0.4rem; }
+            
+            .logo h1 { font-size: 1.5rem; }
+            .logo h1 .life { font-size: 1.1rem; }
+            
+            .cards-view { grid-template-columns: 1fr; }
+            
+            .loader-logo { font-size: 2.8rem; }
+            .loader-progress { width: 80%; }
+            .loader-drop-container { transform: scale(0.7); }
+            
+            #backToTop { bottom: 1rem; right: 1rem; width: 40px; height: 40px; font-size: 1.2rem; }
+        }
+
+        @media (max-width: 480px) {
+            .loader-logo { font-size: 2.2rem; }
+            .loader-drop-container { transform: scale(0.5); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== ЭКРАН ЗАГРУЗКИ ===== -->
+<div id="loading-screen">
+    <div class="loader-bg-particles" id="particles"></div>
+    
+    <div class="loader-drop-container">
+        <div class="loader-ring"></div>
+        <div class="loader-drop"></div>
+    </div>
+    
+    <div class="loader-logo">WSRP<span>.</span>life</div>
+    
+    <div class="loader-progress">
+        <div class="loader-progress-bar" id="progressBar"></div>
+    </div>
+    <div class="loader-percent" id="percentText">0%</div>
+    
+    <div class="loader-dots">
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+    </div>
+</div>
+
+<!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
+<div class="container" id="mainContent" style="display: none;">
+    <div class="header">
+        <div class="logo">
+            <h1><span class="wsrp">WSRP</span><span class="dot">·</span><span class="life">life</span></h1>
+        </div>
+        <div class="header-controls">
+            <div class="badge">⚖ Законы штата · Федеральные</div>
+            <button id="themeToggle" class="btn-rounded">Тёмная</button>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-wrap">
+            <input type="text" id="searchInput" placeholder="Поиск по названию, описанию, номеру..." autocomplete="off">
+            <div class="autocomplete-list" id="autocompleteList"></div>
+        </div>
+        <div class="filter-group" id="typeFilters">
+            <button class="btn-rounded active" data-type="all">Все</button>
+            <button class="btn-rounded" data-type="MISDEMEANOR">Misdemeanor</button>
+            <button class="btn-rounded" data-type="FELONY">Felony</button>
+            <button class="btn-rounded" data-type="INFRACTION">Infraction</button>
+            <button class="btn-rounded" data-type="WOBBLER">Wobbler</button>
+            <button class="btn-rounded" data-type="INFO">Info</button>
+        </div>
+        <div class="view-toggle">
+            <button class="btn-rounded active" data-view="table" id="viewTable">Таблица</button>
+            <button class="btn-rounded" data-view="cards" id="viewCards">Карточки</button>
+        </div>
+        <button class="clear-btn" id="clearFilters">Сбросить</button>
+    </div>
+
+    <div class="table-wrapper" id="tableWrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th data-sort="code">Код <span class="sort-icon">↕</span></th>
+                    <th data-sort="section">Раздел <span class="sort-icon">↕</span></th>
+                    <th data-sort="number">Номер <span class="sort-icon">↕</span></th>
+                    <th data-sort="title">Название <span class="sort-icon">↕</span></th>
+                    <th data-sort="type">Тип <span class="sort-icon">↕</span></th>
+                    <th>Описание</th>
+                    <th>Ссылка</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="cards-view" id="cardsView"></div>
+
+    <div class="stats">
+        <span id="rowCount">Записей: 0</span>
+        <span id="filterHint">Показаны все</span>
+    </div>
+</div>
+
+<button id="backToTop" title="Наверх">↑</button>
+
+<script>
+    // --------------------------------------------------------------
+    // ЭКРАН ЗАГРУЗКИ
+    // --------------------------------------------------------------
+    (function showLoadingScreen() {
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.width = (Math.random() * 4 + 2) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.animationDuration = (Math.random() * 10 + 8) + 's';
+            particle.style.animationDelay = (Math.random() * 10) + 's';
+            particle.style.opacity = Math.random() * 0.5 + 0.2;
+            particlesContainer.appendChild(particle);
+        }
+
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('mainContent');
+        const progressBar = document.getElementById('progressBar');
+        const percentText = document.getElementById('percentText');
+        
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 6 + 2;
+            if (progress > 100) {
+                progress = 100;
+                clearInterval(interval);
+                setTimeout(() => {
+                    loadingScreen.classList.add('hidden');
+                    mainContent.style.display = 'block';
+                    setTimeout(renderTable, 100);
+                    setTimeout(() => {
+                        document.querySelectorAll('.row-animate').forEach((el, i) => {
+                            el.style.animationDelay = (i * 30) + 'ms';
+                        });
+                    }, 200);
+                }, 600);
+            }
+            progressBar.style.width = progress + '%';
+            percentText.textContent = Math.round(progress) + '%';
+        }, 120);
+    })();
+
+    // --------------------------------------------------------------
+    // БАЗА ДАННЫХ ЗАКОНОВ (сокращённая)
+    // --------------------------------------------------------------
+    const rawData = `CFR|36|§ 2.1|Сохранение природных ресурсов|MISDEMEANOR|Запрещается повреждать/уничтожать растения, животных и природные объекты в нацпарках. До 6 месяцев или штраф (до ~$5,000).|https://www.ecfr.gov/current/title-36/chapter-I/part-2/section-2.1
+CFR|36|§ 2.2|Защита дикой природы|MISDEMEANOR|Охота, отлов или умышленное беспокойство диких животных без разрешения. До 6 месяцев, штраф до ~$5,000.|https://www.ecfr.gov/current/title-36/chapter-I/part-2/section-2.2
+CFR|36|§ 2.4|Оружие и взрывчатые вещества|MISDEMEANOR|Незаконное ношение/хранение/использование оружия, ловушек, взрывчатки в парках. До 6 месяцев.|https://www.ecfr.gov/current/title-36/chapter-I/part-2/section-2.4
+CFR|36|§ 2.10|Нарушение правил кемпинга|MISDEMEANOR|Кемпинг вне разрешённых мест/с нарушением правил. До 6 месяцев.|https://www.ecfr.gov/current/title-36/chapter-I/part-2/section-2.10
+CFR|36|§ 2.15|Правила содержания домашних животных|MISDEMEANOR|Отсутствие поводка, выгул в запретных местах и др. До 6 месяцев.|https://www.ecfr.gov/current/title-36/chapter-I/part-2/section-2.15
+LSMC||§ 45.04|Комендантский час для несовершеннолетних|INFRACTION|Несовершеннолетним до 18 лет запрещено находиться в общественных местах с 22:00 до восхода солнца. Запрет не применяется в ряде случаев в оригинальной статье. Штраф до 20$.|https://codelibrary.amlegal.com/codes/los_angeles/latest/lamc/0-0-0-131399
+SABPC||§ 7028|Подрядные работы без лицензии|MISDEMEANOR|Ведение подрядной деятельности без CSLB-лицензии. Наказание: до 6 мес. окружной и/или штраф (первое — до $5,000).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7028.&lawCode=BPC
+SABPC||§ 12024|Обвешивание/обмеривание (весы и меры)|MISDEMEANOR|Занижение массы/объёма при продаже. Наказание: до 6 мес. окружной и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=12024.&lawCode=BPC
+SABPC||§ 17500|Ложная реклама|MISDEMEANOR|Заведомо ложные/вводящие в заблуждение заявления в рекламе. Наказание: до 6 мес. окружной и/или штраф (до ~$2,500).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=17500.&lawCode=BPC
+SABPC||§ 22430|Продажа товаров на улице без лицензии|MISDEMEANOR|Незаконная уличная торговля (фрукты, сувениры, одежда) без разрешения города. До 6 месяцев окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22430.&lawCode=BPC
+SABPC||§ 23300|Продажа алкоголя без лицензии|MISDEMEANOR|Розничная продажа спиртного без ABC-лицензии. Наказание: мисдиминор.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23300.&lawCode=BPC
+SABPC||§ 25602|Продажа алкоголя заведомо пьяному|MISDEMEANOR|Поставка спиртного явно опьянённому/«habitual drunkard». Наказание: мисдиминор.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=25602.&lawCode=BPC
+SABPC||§ 25620|Распитие алкоголя в общественном месте|INFRACTION|Наличие любой ёмкости с алкогольным напитком, которая была открыта, у которой сломанна пломба или часть содержимого была выпита в общественном месте. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=25620.&lawCode=BPC
+SABPC||§ 25631|Продажа алкоголя «после часов»|MISDEMEANOR|Продажа спиртного в запрещённое время. Наказание: мисдиминор.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=25631.&lawCode=BPC
+SABPC||§ 25658|Продажа алкоголя несовершеннолетним|MISDEMEANOR|Продажа/поставка алкоголя лицу <21 года. Наказание: мисдиминор (штраф/до 6 мес. окружной).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=25658.&lawCode=BPC
+SAHSC||§ 11350|Хранение наркотиков (Schedule I/II)|MISDEMEANOR|Хранение любого контролируемого вещества из Schedule I-II (кроме Марихуаны). Наказывается сроком до 1 года в окруженой тюрьме и штрафом в $1000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11350.&lawCode=HSC
+SAHSC||§ 11351|Хранение наркотиков (Schedule I/II) с целью продажи|FELONY|Хранение любого контролируемого вещества из Schedule I-II (кроме Марихуаны) с целью дальнейшей продажи. Наказывается сроком от 2 до 4 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11351.&lawCode=HSC
+SAHSC||§ 11352|Распространение наркотиков (Schedule I/II)|FELONY|Транспортировка, импорт, продажа, предоставление любого контролируемого вещества из Schedule I-II (кроме Марихуаны). Наказывается 3, 6 или 9 годами тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11352.&lawCode=HSC
+SAHSC||§ 11357|Хранение Марихуаны|MISDEMEANOR|Хранение более 1 унции сухой марихуаны или более 0.28 унции концентрированной формы (масла, экстракты) без медицинского разрешения. Наказывается штрафом до $500 или сроком до 6 месяцев в окружной тюрьме. Лицо не достигшее 21 года и хранящее любое количество марихуаны, наказывается штрафом до $100.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11357.&lawCode=HSC
+SAHSC||§ 11358|Незаконное выращивание каннабиса|MISDEMEANOR|Выращивание более 6 кустов Каннабиса и/или выращивание Каннабиса вне закрыто помещения недоступного публичному взору. Наказывается штрафом до $500 или сроком до 6 месяцев в окружной тюрьме. Лицо не достигшее 21 года и выращивающее Каннабис без медицинского разрешения, наказывается штрафом до $100.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11358.&lawCode=HSC
+SAHSC||§ 11359|Хранение марихуаны с целью продажи|WOBBLER|Хранение Марихуаны с целью дальнейшей продажи без соответствующей лицензии. Наказывается штрафом до $500 или сроком до 6 месяцев в окружной тюрьме (MISDEMEANOR) или 1-3 года тюрьмы (FELONY).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11359.&lawCode=HSC
+SAHSC||§ 11360|Распространение Марихуаны|WOBBLER|Транспортировка, импорт, продажа, предоставление Марихуаны. Наказывается штрафом до $500 или сроком до 6 месяцев в окружной тюрьме (MISDEMEANOR) или 2-4 года тюрьмы (FELONY).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11360.&lawCode=HSC
+SAHSC||§ 11364|Владение приспособлениями для употребления наркотиков|MISDEMEANOR|Владение предметами, которые используются для употребления контролируемых веществ из Schedule I-IV (шприцы, курительные и стеклянные трубки, но не включает в себя бонги, трубки и другие приспособления для употребления Марихуаны). Наказывается штрафом до $500 или срокоом до 6 месяцев в окружной тюрьме.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11364.&lawCode=HSC
+SAHSC||§ 11365|Посещение мест употребления наркотиков|MISDEMEANOR|Нахождение в месте, где употребляют наркотики, с целью их совместного использования. До 6 месяцев тюрьмы и штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11365.&lawCode=HSC
+SAHSC||§ 11377|Хранение наркотиков (Schedule III/IV)|MISDEMEANOR|Хранение любого контролируемого вещества из Schedule III/IV. Наказывается сроком до 1 года в окруженой тюрьме и штрафом в $1000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11377.&lawCode=HSC
+SAHSC||§ 11378|Хранение наркотиков (Schedule III/IV) с целью продажи|FELONY|Хранение любого контролируемого вещества из Schedule III/IV с целью дальнейшей продажи. Наказывается сроком от 1 до 3 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11378.&lawCode=HSC
+SAHSC||§ 11379|Распространение наркотиков (Schedule III/IV)|FELONY|Транспортировка, импорт, продажа, предоставление любого контролируемого вещества из Schedule III/IV. Наказывается 2-9 годами тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11379.&lawCode=HSC
+SAHSC||§ 11550|Нахождение под наркотиками|MISDEMEANOR|Появление в общественном месте в состоянии наркотического опьянения. До 1 года окружной тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=11550.&lawCode=HSC
+SAHSC||§ 12677|Незаконные фейерверки|MISDEMEANOR|Хранение/использование пиротехники без разрешения. До 1 года окружной тюрьмы и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=12677.&lawCode=HSC
+SAHSC||§ 13143|Нарушение правил пожарной безопасности на заправке|MISDEMEANOR|Запрещено курение/открытый огонь/зажжённые сигареты в пределах 20 футов от топливораздаточных колонок и насосов. Наказание: до $1,000 и/или до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=13143
+SAHSC||§ 111825|Фальсифицированные/неправильно маркированные продукты/товары (Sherman Law)|MISDEMEANOR|Продажа или поставка ядовитого и/или небезопасного товара, лекарственных препаратов иностранного производства не получившие одобрение на продажу в Сан Андреас. Неправильная маркировка товара (состав не соответствует заявленному стандарту, этикетка содержит ложную или вводящую в заблуждение информацию, на этикетке отсутствуют предупреждения об опасности или указания по применению). Штраф до $1000 и/или до 1 года в окружной тюрьме.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=111825.&lawCode=HSC
+SAHSC||§ 114395|Эксплуатация пищевого заведения без разрешения|MISDEMEANOR|Эксплуатация пищевого заведения без разрешения. Штраф до $1000 и/или до 6 месяцев в окружной тюрьме.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=114395.&lawCode=HSC
+SAHSC||§ 118948|Курение в транспортном средстве с несовершеннолетними|INFRACTION|Запрещается курить в транспортном средстве при наличии лица младше 18 лет (не важно, движется ТС или стоит). Штраф: до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=118948
+SALB||§ 6404.5|Курение в общественных местах и на предприятиях|INFRACTION|Запрещено курение табака или каннабиса внутри закрытых рабочих пространств и общественных зданий. Штраф: $238–$480; повторно (в течение года) до $500; далее до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=6404.5
+SAPC||§ 32|Сокрытие преступника|FELONY|Лицо, скрывающее преступника после совершения фелони. Наказание — до 3 лет в тюрьме штата или до 1 года в окружной тюрьме.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=33.&lawCode=PEN
+SAPC||§ 67|Взятка должностному лицу|FELONY|Дача или предложение взятки госслужащему. Наказание — 2–4 года тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=67.&lawCode=PEN
+SAPC||§ 68|Получение взятки должностным лицом|FELONY|Принятие или согласие на взятку госслужащим. Наказание — 2–4 года тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=68.&lawCode=PEN
+SAPC||§ 69|Сопротивление должностному лицу|FELONY|Угроза или насилие в отношении офицера при исполнении. Наказание — до 3 лет в тюрьме штата или до 1 года в окружной тюрьме. Применяется только к офицерам штата/города. Для федеральных агентов см. 18 § 111.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=69.&lawCode=PEN
+SAPC||§ 85|Подкуп члена законодательного органа|FELONY|Попытка подкупа депутата за голос или решение. Наказание — 2–4 года тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=85.&lawCode=PEN
+SAPC||§ 86|Получение подкупа членом законодательного органа|FELONY|Принятие вознаграждения депутатом за голос или решение. Наказание — 2–4 года тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=86.&lawCode=PEN
+SAPC||§ 92|Взятка судье или присяжному|FELONY|Дача или предложение взятки судье, присяжному или арбитру. Наказание — 2–4 года тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=92.&lawCode=PEN
+SAPC||§ 93|Получение взятки судьёй или присяжным|FELONY|Принятие вознаграждения судьёй, присяжным или арбитром. Наказание — 2–4 года тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=93.&lawCode=PEN
+SAPC||§ 118|Лжесвидетельство (Perjury)|FELONY|Заведомо ложные показания под присягой. Наказание — до 4 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=118.&lawCode=PEN
+SAPC||§ 132|Подлог доказательств|FELONY|Создание ложных, подделка или уничтожение доказательств. Наказание — до 5 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=132.&lawCode=PEN
+SAPC||§ 135|Уничтожение или сокрытие доказательств|WOBBLER|Лицо, которое, зная, что какая-либо книга, бумага, запись, изображение, видеозапись, принадлежащие другому лицу, или другой предмет или вещь будут представлены в качестве доказательств в ходе судебного разбирательства или расследования, умышленно уничтожает, стирает или скрывает их с целью помешать их представлению или раскрытию их содержания. До 6 месяцев и/или штраф до 1,000$ (MISDEMEANOR). До 3 лет и/или штраф до 10,000$ (FELONY).|https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?chapter=6.&part=1.&lawCode=PEN&title=7.
+SAPC||§ 136.1|Влияние на свидетеля|WOBBLER|Запугивание или подкуп свидетеля. Наказание: до 1 года окружной (misd.) или до 4 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=136.1.&lawCode=PEN
+SAPC||§ 137|Подкуп свидетеля|FELONY|Предложение взятки свидетелю за ложные показания. До 4 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=137.&lawCode=PEN
+SAPC||§ 138|Подкуп для отказа свидетеля от показаний|FELONY|Взятка за отказ от свидетельства. До 4 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=138.&lawCode=PEN
+SAPC||§ 148|Препятствование деятельности государственных служащих|MISDEMEANOR|Умышленное сопротивление, задерживание или препятствие государственному служащему при исполнении ими служебных обязанностей. Нарушением может считаться отказ выполнять законные требования, попытка помешать задержанию или иное вмешательство в работу должностного лица. Наказание: штраф до $1 000 и/или арест до 1 года.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=148.&nodeTreePath=4.6.7&lawCode=PEN
+SAPC||§ 148.5|Ложное сообщение о преступлении|MISDEMEANOR|Заведомо ложное сообщение о преступлении или заведомо ложное сообщение об утере оружия сотруднику правоохранительных органов, диспетчеру, прокурору или любому лицу, уполномоченному принимать подобные сообщения от граждан. Наказание: лишение свободы до 6 месяцев и/или штраф до 1000 долларов.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=148.5.
+SAPC||§ 148.9|Предоставление ложных данных для идентификации|MISDEMEANOR|Человек, будучи законно задержанным или арестованным, предоставляет ложные идентификационные данные (например, чужое имя или вымышленное имя) с целью уклониться от судебного преследования или надлежащей идентификации офицером. Наказание: лишение свободы до 6 месяцев и/или штраф до 1000 долларов.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=148.9.
+SAPC||§ 149|Избиение под арестом|FELONY|Неправомерное нанесение побоев или применение силы офицером в отношении задержанного лица. Наказание — до 1 года окружной тюрьмы или 2–3 года в тюрьме штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=149.&lawCode=PEN
+SAPC||§ 152|Сокрытие смерти в результате несчастного случая|MISDEMEANOR|Каждое лицо, которое, зная о смерти в результате несчастного случая, активно скрывает или пытается скрыть эту смерть, виновно в правонарушении, наказуемом тюремным заключением в окружной тюрьме на срок не более одного года и/или штрафом в размере от 1000$ до 10000$.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=152
+SAPC||§ 166|Неуважение к суду (Contempt of Court)|WOBBLER|Каждое лицо, которое проявляет беспорядочное, дерзкое или неуважительное поведение во время заседания суда, в присутствии суда, прямо направленное на прерывание его работы или умаление уважения к его власти, а также умышленно не исполняет письменные судебные приказы, виновно в правонарушении. Наказание: до 6 месяцев в окружной тюрьме и/или штраф до $1,000. Умышленное нарушение судебного запрета или защитного приказа до 1 года тюрьмы и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=166
+SAPC||§ 171b(a)|Ношение и/или хранение оружия в общественном месте|MISDEMEANOR|Запрещено ношение/хранение оружия и ряда опасных предметов в гос/муниц зданиях, аэропортах, вокзалах и на публичных собраниях. Наказание: до $1,000 и/или до 1 года.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=171b.
+SAPC||§ 182|Преступный сговор|INFO|Сговор двух и более лиц на совершение преступления. Наказание соответствует наказанию за основное преступление, к которому готовился заговор.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=182.&lawCode=PEN
+SAPC||§ 185|Маскировка при совершении преступления|MISDEMEANOR|Использование маски, чтобы скрыть личность при совершении преступления. До 6 месяцев окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=185.&lawCode=PEN
+SAPC||§ 186.22|Участие в уличной банде|WOBBLER|Лицо, которое активно участвует в уличной банде, зная о преступной деятельности её членов, и умышленно способствует, облегчает либо поощряет фелоническую преступную деятельность, несёт ответственность: Misdemeanor: до 1 года в окружной тюрьме и/или штраф; Felony: до 16 месяцев лишения свободы с увеличением срока до 120 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=186.22
+SAPC||§ 187|Определение убийства|INFO|Убийство — это противоправное лишение жизни человека со злым умыслом.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=187.
+SAPC||§ 190(a)|Убийство первой степени|FELONY|Умышленное, заранее обдуманное и спланированное убийство. Убийство, совершенное с помощью взрывчатых веществ, устройства-ловушки, яда или пыток. Наказывается от 25 лет тюрьмы до пожизненного лишения свободы или смертной казнью.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=190.
+SAPC||§ 190(b)|Убийство второй степени|FELONY|Все остальные виды убийства, совершенные со злым умыслом, но не подпадающие под критерии первой степени. Наказывается от 15 лет тюрьмы до пожизненного лишения свободы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=190.
+SAPC||§ 191.5|Убийство автомобилем в состоянии опьянения|FELONY|Управление автомобилем в состоянии опьянения с небрежностью, приведшее к смерти человека. Наказывается от 4 до 10 лет тюрьмы и штрафом до $10.000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=191.5.
+SAPC||§ 192|Непредумышленное убийство|INFO|Непредумышленное убийство — это противоправное лишение жизни человека без злого умысла.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=192.
+SAPC||§ 192(a)|Добровольное непредумышленное убийство|FELONY|Умышленное лишение жизни в состоянии внезапной ссоры или "пыла страсти", либо в результате необоснованной самообороны. Наказывается 3, 6 или 11 годами тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=192.
+SAPC||§ 192(b)|Недобровольное непредумышленное убийство|WOBBLER|Неумышленное лишение жизни в результате совершения противоправного действия (только misdemeanor) или в результате совершения правомерного действия, но без должной осмотрительности и осторожности (халатность). Наказывается от 2 до 4 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=192.
+SAPC||§ 203|Нанесение тяжких телесных повреждений|FELONY|Противоправное и злоумышленное лишение человека части тела, ее обезображивание, приведение в негодность, причинение человеку постоянной нетрудоспособности, выкалывание глаза, отсечение языка, носа, уха или губы. Наказывается 2, 4 или 8 годами тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=203.
+SAPC||§ 205|Нанесение тяжких телесных повреждений с отягчающими обстоятельствами|FELONY|Противоправное и злоумышленное лишение человека части тела, ее обезображивание, приведение в негодность, причинение человеку постоянной нетрудоспособности, выкалывание глаза, отсечение языка, носа, уха или губы, в обстоятельствах, свидетельствующих о крайнем безразличии к его физическому или психологическому благополучию. Наказывается пожизненным лишением свободы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=205.
+SAPC||§ 206|Пытки|FELONY|Нанесение тяжких телесных повреждений с намерением причинить жестокую или крайнюю боль и страдания с целью мести, вымогательства, убеждения или в любых садистских целях. Наказывается пожизненным лишением свободы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=206.
+SAPC||§ 207|Похищение человека (Kidnapping)|FELONY|Незаконное удерживание, транспортировка или/и содержание в изоляции жертвы/жертв с применением силы или запугивания. Наказывается 3, 5 или 8 годами тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=208.&lawCode=PEN
+SAPC||§ 209|Похищение человека с отягчающими обстоятельствами|FELONY|Незаконное удерживание, транспортировка или/и содержание в изоляции жертвы/жертв с применением силы или запугивания с целью получения выкупа или с целью облегчить совершение другого тяжкого преступления. Наказывается пожизненным лишением свободы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=209.&lawCode=PEN
+SAPC||§ 211|Ограбление (Robbery)|FELONY|Хищение имущества с применением силы или угрозы. Наказание — 2–9 лет (в зависимости от степени).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=213.&lawCode=PEN
+SAPC||§ 215|Угон автомобиля (Carjacking)|FELONY|Захват автомобиля с применением силы или угрозы. Наказание — 3–9 лет в тюрьме штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=215.&lawCode=PEN
+SAPC||§ 217.1|Нападение на должностное лицо|FELONY|Насилие или угроза против судей, чиновников, политиков. Наказание — до 3 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=217.1.&lawCode=PEN
+SAPC||§ 241(a)|Нападение|MISDEMEANOR|Преднамеренная попытка применения силы, угроза физической расправой, проявление силы, которое даст другому человеку повод бояться или ожидать причинения ему телесных повреждений. Нападение может быть совершено без непосредственного прикосновения, нанесения удара или нанесения телесных повреждений другому человеку. Штраф до $1000 и/или до 6 месяцев в окружной тюрьме.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=241.&lawCode=PEN
+SAPC||§ 241(c)|Нападение на государственного служащего|MISDEMEANOR|Преднамеренная попытка применения силы, угроза физической расправой, проявление силы, которое даст другому человеку повод бояться или ожидать причинения ему телесных повреждений в отношении сотрудника правоохранительных органов, пожарного, спасателя, парамедика, мед.работника и т.д. Нападение может быть совершено без непосредственного прикосновения, нанесения удара или нанесения телесных повреждений другому человеку. Штраф до $2000 и/или до 1 года в окружной тюрьме.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=241.&lawCode=PEN
+SAPC||§ 243|Избиение (Battery)|MISDEMEANOR|Умышленное применение силы или насильственных действий в отношении другого лица. Штраф до $2.000 и/или до 6 месяцев в окружной тюрьме.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=243.&lawCode=PEN
+SAPC||§ 243(b)|Избиение государственного служащего|WOBBLER|Умышленное применение силы или насильственных действий в отношении сотрудника правоохранительных органов, пожарного, спасателя, парамедика, мед.работника и т.д. До 1 года окружной тюрьмы и/или штраф в размере до $2.000 (misdemeanor). До 3 лет тюрьмы и штраф в размере до $2.000 (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=243.&lawCode=PEN
+SAPC||§ 243(d)|Избиение с отягчающими обстоятельствами|WOBBLER|Умышленное применение силы или насильственных действий в отношении другого лица в результате которого жертве были нанесены серьезные раны/ушибы/переломы и т.д. или избиение в отношении несовершеннолетних. До 1 года окружной тюрьмы и/или штраф в размере до $2.000 (misdemeanor). От 2 до 4 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=243.&lawCode=PEN
+SAPC||§ 245(a)|Угроза нападения с отягчающими обстоятельствами|FELONY|Угроза жизни другого человека, с применением смертельного оружия или предмета, с помощью которого можно нанести серьезный вред здоровью. Штраф до $10.000 и/или от 1 до 4 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=245.&lawCode=PEN
+SAPC||§ 245(c)|Угроза нападения на гос. служащего с отягчающими обстоятельствами|FELONY|Угроза жизни другого человека, с применение смертельного оружия или предмета, с помощью которого можно нанести серьезный вред здоровью в отношении сотрудника правоохранительных органов, пожарного, спасателя, парамедика, мед.работника и т.д. Наказывается сроком от 3 до 5 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=245.&lawCode=PEN
+SAPC||§ 246|Незаконное разряжение оружия|FELONY|Умышленная стрельба из огнестрельного оружия по занятым жилым или иным занятым зданиям, а также занятым транспортным средствам является тяжким преступлением. Наказание — лишение свободы на срок 3, 5 или 7 лет, либо заключение в окружной тюрьме от 6 месяцев до 1 года.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=246
+SAPC||§ 246.3|Небрежная стрельба из оружия или небрежное применение взрывчатых веществ|WOBBLER|Умышленная или неумышленная стрельба из огнестрельного, неогнестрельного или имитационного оружия, которая может привести к травме или смерти, а также умышленное или неумышленное применение взрывчатого вещества, которое может привести к травме или смерти. Наказание: лишение свободы до 1 года.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=246.3.
+SAPC||§ 261|Изнасилование|FELONY|Половой акт без согласия. Наказание — 3–8 лет тюрьмы штата. Если жертва <18 лет или при отягчающих обстоятельствах — до пожизненного.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=261.&lawCode=PEN
+SAPC||§ 262|Изнасилование в браке|FELONY|Половой акт без согласия между супругами. 3–8 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=262.&lawCode=PEN
+SAPC||§ 264.1|Групповое изнасилование|FELONY|Совместное совершение изнасилования двумя и более лицами. Наказание — 5–9 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=264.1.&lawCode=PEN
+SAPC||§ 266(h)|Сутенёрство|FELONY|Содержание проституции и извлечение выгоды. Наказание — 3–6 лет тюрьмы, при вовлечении несовершеннолетних — до пожизненного.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=266h.&lawCode=PEN
+SAPC||§ 270|Неисполнение обязанностей родителя|MISDEMEANOR|Уклонение от содержания ребёнка. До 1 года окружной тюрьмы, штраф до $2,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=270.&lawCode=PEN
+SAPC||§ 271|Подкидывание ребёнка|WOBBLER|Оставление новорождённого в небезопасных условиях. До 1 года окружной или до 3 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=271.&lawCode=PEN
+SAPC||§ 272|Развращение несовершеннолетних|WOBBLER|Склонение детей к преступлениям или аморальному поведению. До 1 года окружной или до 3 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=272.&lawCode=PEN
+SAPC||§ 273(a)|Жестокое обращение с детьми|WOBBLER|Создание угрозы здоровью ребёнка. До 1 года окружной (misdemeanor) или 2–6 лет (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=273a.&lawCode=PEN
+SAPC||§ 273(d)|Телесные наказания детей|WOBBLER|Умышленное нанесение телесных повреждений ребёнку. До 1 года окружной или 2–6 лет в тюрьме (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=273d.&lawCode=PEN
+SAPC||§ 273.5|Домашнее насилие|WOBBLER|Нанесение травм супругу, сожителю или другому близкому лицу. До 1 года окружной (misdemeanor) или 2–4 лет (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=273.5.&lawCode=PEN
+SAPC||§ 285|Инцест|FELONY|Брак между близкими родственниками (инцестуозный и недействительный), либо половые отношения между такими лицами (14+). Наказание: 16 мес.–3 года и/или штраф до $10,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=285
+SAPC||§ 286|Содомия с насилием|FELONY|Половой акт анального характера с применением силы. Наказание — 3–8 лет.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=286.&lawCode=PEN
+SAPC||§ 286.5|Сексуальный контакт с животным|MISDEMEANOR|Сексуальный контакт с животным. Наказание: до 1 года лишения свободы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=286.5
+SAPC||§ 288|Растление несовершеннолетних|FELONY|Сексуальные действия с ребёнком младше 14 лет. 3–8 лет (обычные случаи), до пожизненного при тяжких обстоятельствах.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=288.&lawCode=PEN
+SAPC||§ 302|Нарушение религиозного собрания|MISDEMEANOR|Умышленное вмешательство/препятствование проведению религиозного собрания или богослужения. Наказание: до $1,000 и/или до 3 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=302
+SAPC||§ 303(A)|Запрещение попрошайничества и вовлечения в покупку алкоголя|MISDEMEANOR|Запрещено находиться у заведения с алкоголем “для потребления на месте” с целью попрошайничества или просьбы купить алкоголь. Наказание: до 6 месяцев и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=303a
+SAPC||§ 307|Снабжение алкоголем в продуктах для несовершеннолетних|MISDEMEANOR|Запрещено продавать/давать лицу младше 21 года конфеты/выпечку/печенье/жвачку с алкоголем более 0.5% по массе. Наказание: до 1 года и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=307
+SAPC||§ 308|Продажа табачной продукции несовершеннолетним|MISDEMEANOR|Продажа или передача любой табачной продукции и/или изделия предназначенного для курения лицу не достигшему совершеннолетия (21 год). Первое нарушение - штраф $200, второе - $500, третье - $1000, четвертое и последующие - $1000 и до месяца в окружной тюрьме.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=308.&lawCode=PEN
+SAPC||§ 309|Допуск несовершеннолетних в бордели или стриптиз-клубы|MISDEMEANOR|Владелец/управляющий/контролирующее лицо, допускающее несовершеннолетнего в стриптиз-клуб/танцевальное помещение, а также родитель/опекун, способствующий допуску. Наказание: до 1 года и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=309
+SAPC||§ 314|Непристойное обнажение|MISDEMEANOR|Умышленное обнажение тела в непристойной форме в общественном месте. До 6 месяцев окружной тюрьмы, штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=314.&lawCode=PEN
+SAPC||§ 343|Обязанность ломбарда предоставлять регистр и товары для проверки|MISDEMEANOR|Отказ/уклонение от предъявления регистра, заложенных предметов или отчёта о продажах уполномоченному офицеру или по судебному приказу. Наказание: до 1 года и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=343
+SAPC||§ 346|Незаконная перепродажа билетов на мероприятие (скальпинг)|MISDEMEANOR|Продажа билета на развлекательное событие (полученного для перепродажи) по цене выше указанной на билете без письменного разрешения владельца/оператора площадки. Наказание: до 1 года и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=346
+SAPC||§ 347|Отравление пищи/воды/лекарств|FELONY|Умышленное добавление вредных веществ в еду, воду или лекарства. Наказание: 2–5–7 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=347.&lawCode=PEN
+SAPC||§ 368|Преступления против пожилых и инвалидов|WOBBLER|Жестокое обращение, кража или мошенничество в отношении уязвимых лиц. До 4 лет тюрьмы (felony) или 1 года окружной (misdemeanor).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=368.&lawCode=PEN
+SAPC||§ 372|Создание общественного неудобства (Public Nuisance)|MISDEMEANOR|Действия, мешающие пользованию улицей/парком (баррикады, небезопасные конструкции). До 6 месяцев окружной тюрьмы, штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=372.&lawCode=PEN
+SAPC||§ 374.3|Незаконный сброс мусора/мебели|MISDEMEANOR|Выброс мебели, автошин, крупного мусора на улицу или в реку. Штраф до $3,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=374.3.&lawCode=PEN
+SAPC||§ 374.4|Бросание мусора|INFRACTION|Незаконный выброс мусора, бутылок, окурков на улицу. Штраф до $1,000, при рецидиве — до 6 месяцев окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=374.4.&lawCode=PEN
+SAPC||§ 402|Воспрепятствование деятельности госслужб с помощью дрона|MISDEMEANOR|Запрещено использовать дрон или наблюдать на месте инцидента, если это мешает работе государственных структур. Наказание: до $1,000 и/или до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=402
+SAPC||§ 404|Бунт (Riot)|MISDEMEANOR|Участие в насильственных действиях группы (2+ человек). До 1 года окружной тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=404.&lawCode=PEN
+SAPC||§ 405|Участие в массовых беспорядках|MISDEMEANOR|Участие в массовых беспорядках. Наказание: штраф до $1000 и/или арест до 1 года.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=405.&nodeTreePath=4.10&lawCode=PEN
+SAPC||§ 405 (a)|Линчевание|FELONY|Насильственное освобождение задержанного из-под стражи толпой. Наказание: штраф до $10 000 и/или арест до 4 лет.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=405a.&lawCode=PEN
+SAPC||409.5|Незаконное проникновение в зону перекрытия|MISDEMEANOR|Запрещается умышленное и осознанное проникновение либо пребывание в зоне, закрытой для гражданских лиц. Наказание: до 6 месяцев в окружной тюрьме и/или штраф до $1,000|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=409.5
+SAPC||§ 409|Неповиновение при объявленном сборе|MISDEMEANOR|Отказ разойтись после объявления незаконного собрания. До 6 месяцев окружной тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=409.&lawCode=PEN
+SAPC||§ 415|Нарушение общественного порядка|MISDEMEANOR|Запрещается провоцировать/устраивать драки или создавать громкий шум. При незначительных INF. Наказание: штраф до $250 (INF); штраф до $400 и/или до 3 месяца ареста (MIS).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=415.&lawCode=PEN
+SAPC||§ 415(1)|Уличная драка|MISDEMEANOR|Участие в драке в общественном месте. До 90 дней окружной тюрьмы и/или штраф до $400.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=415.&lawCode=PEN
+SAPC||§ 415(2)|Нарушение тишины|MISDEMEANOR|Громкая музыка, крики или шум, нарушающие спокойствие. До 90 дней окружной тюрьмы и/или штраф до $400.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=415.&lawCode=PEN
+SAPC||§ 415(3)|Оскорбления и угрозы|MISDEMEANOR|Использование оскорблений или угроз в общественном месте, провоцирующих драку. До 90 дней окружной тюрьмы и/или штраф до $400.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=415.&lawCode=PEN
+SAPC||§ 415.5|Нарушение порядка на территории школы|MISDEMEANOR|Драка, шум или хулиганство на территории любой школы, колледжа или университета. До 90 дней окружной тюрьмы и/или штраф до $400.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=415.5.&lawCode=PEN
+SAPC||§ 416|Участие в незаконном собрании|MISDEMEANOR|Отказ покинуть место при указании полиции. До 6 месяцев окружной тюрьмы, штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=416.&lawCode=PEN
+SAPC||§ 417|Размахивание оружием|WOBBLER|Незаконное доставание или демонстрация оружия, создающее угрозу. До 1 года окружной (misd.) или до 3 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=417.&lawCode=PEN
+SAPC||§ 417.4|Угрожающее демонстрирование имитационного огнестрельного оружия|MISDEMEANOR|Каждое лицо, за исключением случаев самообороны, которое вытягивает или демонстрирует имитационное огнестрельное оружие угрожающим образом перед другим лицом, так что разумный человек испытывает страх причинения вреда. Подразумевает заключение в окружную тюрьму на срок не менее 30 дней и до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=417.4
+SAPC||§ 420.1|Блокировка прохода к территории|INFRACTION|Запрещено блокирование входа, прохода, пересечения или выхода с территории. Наказание: штраф до $500|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=420.1.&nodeTreePath=4.10&lawCode=PEN
+SAPC||§ 422|Угроза насилием (Criminal Threats)|WOBBLER|Угроза смерти/тяжких телесных (устно/письменно/электронно), сделанная умышленно, чтобы жертва имела страх за себя или близких. Наказание: до 1 года в окружной тюрьме и/или штраф до $1,000 (MISDEMEANOR). От 16 месяцев до 3 лет в государственной тюрьме и/или штраф до $10,000 (FELONY).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=422
+SAPC||§ 451|Умышленный поджог (Arson)|FELONY|Лицо виновно в умышленном поджоге, если оно умышленно и злонамеренно поджигает, сжигает или способствует поджогу или помогает, советует или организует поджог любого строения, лесного массива или имущества. До 9 лет лишения свободы в зависимости от ущерба/наличия пострадавших.|https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=PEN&division=&title=13.&part=1.&chapter=1.&article=
+SAPC||§ 452|Неумышленный поджог|WOBBLER|Лицо виновно в неумышленном поджоге, если оно по неосторожности поджигает, сжигает или вызывает поджог любого строения, лесного массива или имущества. До 6 лет лишения свободы или штраф до $1000 в зависимости от ущерба/наличия пострадавших.|https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=PEN&division=&title=13.&part=1.&chapter=1.&article=
+SAPC||§ 4532|Побег из окружной тюрьмы, городской, альтернативной программы содержания, лагеря|FELONY|Побег или попытка побега из окружной тюрьмы, городской камеры (временные места содержания), во время транспортировки, программы содержания (домашний арест, электронный мониторинг, общественные работы), лагеря (Road camp, Industrial farm, County work camp) без применения силы или насилия. От 16 месяцев до 3 лет. С применением силы и насилия от 2 лет до 6 лет.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=4532.
+SAPC||§ 4550|Помощь в побеге|FELONY|Содействие побегу заключённого из тюрьмы. 2–4 года тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=4550.&lawCode=PEN
+SAPC||§ 4577|Запрет полёта дронов над тюрьмами и ювенальными заведениями|INFRACTION|Умышленное управление дроном над территорией тюрем, исправительных учреждений или ювенальных заведений. Штраф: $500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=4577
+SAPC||§ 459|Кража со взломом|WOBBLER|Проникновение в помещение или автомобиль с намерением совершить кражу либо другое преступление. Проникновение в не жилищные помещение считается проступком, а в жилые места уголовным. Наказание: штраф до $1 000 и/или арест до 3 лет (MIS); до 6 лет тюрьмы и/или штраф $10 000 (FEL).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=461.&lawCode=PEN
+SAPC||§ 466|Владение инструментами для взлома|MISDEMEANOR|Человек, имеющий при себе отмычку, ключ, лом, отвертку, клещи для захвата тисков, плоскогубцы для водяного насоса, скользящий молоток, натяжной брус, пистолет для отмычки, трубчатую отмычку, ударный ключ, напольный дверной съемник, мастер-ключ, керамические или фарфоровые свечи зажигания или другие инструменты с намерением преступно взломать или войти в любое здание, железнодорожный вагон, самолет или судно, вагон прицепа или транспортное средство.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=466.&lawCode=PEN
+SAPC||§ 470|Подделка документов и печатей|WOBBLER|Подделка подписей, печатей, чеков, официальных бумаг, удостоверений и иных документов с умыслом на мошенничество. Наказание: до 1 года окружной тюрьмы или 16 мес.–3 лет тюрьмы штата. Если подделка чека на сумму до $950 - только до 1 года окружной|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=473.&lawCode=PEN
+SAPC||§ 472|Подделка печатей и государственных документов|FELONY|Использование или изготовление поддельных гос. печатей и удостоверений. До 3 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=472.&lawCode=PEN
+SAPC||§ 484|Кража (Theft)|WOBBLER|Незаконное присвоение чужого имущества. Наказание зависит от стоимости (§ 490): petty theft — до 6 мес. тюрьмы; grand theft (§ 489) — 16 мес.–3 лет.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=490.&lawCode=PEN
+SAPC||§ 485|Присвоение найденной чужой собственности|WOBBLER|Присвоение найденного имущества при знании или наличии способов установить владельца. Наказание: до 6 мес. и/или $1,000 (MIS); до 3 лет и/или $10,000 (FEL).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=485
+SAPC||§ 487|Grand Theft (Крупная кража)|FELONY|Кража имущества свыше $950, огнестрельного оружия или автомобиля. Наказание (§ 489): 16 мес.–3 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=489.&lawCode=PEN
+SAPC||§ 488|Petty Theft (Мелкая кража)|MISDEMEANOR|Кража имущества стоимостью до $950. Наказание (§ 490): до 6 месяцев окружной тюрьмы, штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=490.&lawCode=PEN
+SAPC||§ 496|Использование украденного имущества|WOBBLER|Запрещается владение, получение, покупка или продажа украденного имущества, а также сокрытие или помощь в его сокрытии, продаже или удержании при наличии информации, что имущество было украдено или получено в результате вымогательства. Наказание: штраф до $1.000 и/или арест до 1 года (MIS); лишение свободы до 3 лет и/или штраф до $10.000 (FEL).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=496.
+SAPC||§ 496(d)|Использование украденного (угнанного) транспортного средства|WOBBLER|Запрещается владение, получение, покупка или продажа украденного (угнанного) транспортного средства, а также сокрытие или помощь в его сокрытии, продаже или удержании при наличии информации, что транспортного средства было украдено (угнано) или получено в результате вымогательства. Наказание: штраф до $1.000 и/или арест до 1 года (MIS); лишение свободы до 3 лет и/или штраф до $10.000 (FEL).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=496d.
+SAPC||§ 503|Присвоение (Embezzlement)|WOBBLER|Незаконное присвоение доверенного имущества. До 3 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=503.&lawCode=PEN
+SAPC||§ 518|Вымогательство (Extortion)|FELONY|Принуждение к передаче имущества через угрозы или насилие. Наказание (§ 520): 2–4 года тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=520.&lawCode=PEN
+SAPC||§ 529|Выдача себя за другое лицо|WOBBLER|Выдача себя за другое лицо ради получения выгоды или возложения ответственности на этого человека. До 1 года тюрьмы и/или штраф до $10 000(MIS) или до 3-х лет тюрьмы и/или штраф до $10 000|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=529.&lawCode=PEN
+SAPC||§ 530.5(a)|Кража личности|WOBBLER|Умышленное получение персональных идентифицирующих данных другого лица без его согласия и их использование в незаконных целях, в том числе с намерением совершить мошенничество. До 1 года окружной и/или штраф до $1 000 (misd.) или до 3 лет тюрьмы и/или штраф до $10 000 (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=530.5.&lawCode=PEN
+SAPC||530.5(d)|Продажа персональных данных|FELONY|Передача или продажа чужих персональных данных для их незаконного использования без согласия обладателя. До 1-го года тюрьмы и/или штраф $10 000|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=530.5.&lawCode=PEN
+SAPC||§ 532|Мошенничество (False Pretenses)|WOBBLER|Получение имущества путём обмана. До 3 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=532.&lawCode=PEN
+SAPC||§ 532(b)|Ложное представление себя ветераном вооружённых сил|MISDEMEANOR|Лицо, которое ложно представляет себя ветераном вооружённых сил США с целью какой-либо выгоды. Наказание: штраф до $1 000 и/или арест до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=532b
+SAPC||§ 537|Мошенничество в сфере услуг|WOBBLER|Уклонение от оплаты услуг в гостинице, ресторане, такси или на заправке, а также иных сервисов и услуг. До 6 мес. (misd.) и штраф до 1000$ или до 1 года (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=537.&lawCode=PEN
+SAPC||§ 538(d)|Выдача себя за сотрудника правоохранительных органов|WOBBLER|Любое лицо, которое намеренно выдает себя за сотрудника правоохранительных органов (федерального, штата или местного), и/или носит, демонстрирует или использует любую эмблему, значок, удостоверение, нашивку, одежду или отличительный знак сотрудника правоохранительных органов с целью ввести в заблуждение, является виновным в данном правонарушении. Наказание: MIS - Лишение свободы до 1-го года и/или штраф до $1000. FEL - Лишение свободы до 3-х лет.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=538d
+SAPC||§ 538(e)|Выдача себя за пожарного|MISDEMEANOR|Использование элементов одежды с символикой пожарной службы (или похожих на них) с целью выдать себя за пожарного, включая интернет. Наказание: штраф до $2 000 и/или арест до 1 года.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=538e
+SAPC||§ 550|Страховое мошенничество|FELONY|Фальсификация страховых случаев, заявлений или ущерба. До 5 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=550.&lawCode=PEN
+SAPC||§ 594|Вандализм|WOBBLER|Умышленная порча или разрушение чужого имущества. Если ущерб < $400 — до 1 года окружной (misdemeanor). Если > $400 — до 3 лет (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=594.&lawCode=PEN
+SAPC||§ 594.7|Неумышленное повреждение имущества штата/города/округа|INFRACTION|Неумышленное повреждение гос/муниц имущества по неосторожности. Возмещение ущерба. Штраф: до $500 при ущербе < $950; до $1,000 при ущербе ≥ $950. При скрытии с места — см. §20002.|https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=VEH&division=9.&title=&part=&chapter=1.&article=3.
+SAPC||§ 597|Жестокое обращение с животными|WOBBLER|Умышленное причинение боли или страданий животному. Неисполнение владельцем своих обязанностей по уходу за домашним животным, а также беспечные проступки, способные привести к причинению вреда здоровью или смерти домашнего животного. До 1 года окружной тюрьмы и/или штраф в размере до $20.000 (misdemeanor). До 3 лет тюрьмы и штраф в размере до $20.000 (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=597.&lawCode=PEN
+SAPC||§ 597.7|Оставление животного в автомобиле|MISDEMEANOR|Оставление животного в автомобиле в условиях, угрожающих его здоровью. Наказание: без вреда животному штраф $100 за каждого, если есть вред или нарушение повторное - штраф до $500 и/или арест до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=597.7
+SAPC||§ 602|Незаконное проникновение (Trespass)|MISDEMEANOR|Незаконное вторжение на чужую территорию, включая гос. здания. До 6 месяцев окружной тюрьмы, штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=602.&lawCode=PEN
+SAPC||§ 602(o)|Незаконное проникновение в транспорт/метро|MISDEMEANOR|Вход на закрытые транспортные объекты (депо, рельсы, тоннели). До 6 месяцев окружной, штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=602.&lawCode=PEN
+SAPC||§ 602(m)|Сквоттинг|MISDEMEANOR|Незаконное занятие или проживание в чужом здании/помещении без разрешения владельца. До 6 месяцев окружной тюрьмы и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=602.&lawCode=PEN
+SAPC||§ 602.1|Нарушение правил бизнеса|MISDEMEANOR|Препятствование законной коммерческой деятельности, нарушение правил коммерческого предприятия. Отказ покинуть коммерческое предприятия по требованию владельца или сотрудника охраны. До 90 дней окружной тюрьмы и/или штраф до $400.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=602.1.&lawCode=PEN
+SAPC||§ 602.7|Катание на велосипеде/скейтборде в запрещённых местах|INFRACTION|Использование велосипеда, скейта или роликов в зонах, где это запрещено (мэрия, бизнес-центры, паркинги). Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=602.7.&lawCode=PEN
+SAPC||§ 632|Незаконная запись конфиденциальных разговоров|WOBBLER|Запрещено записывать конфиденциальные разговоры без согласия сторон. Наказание: до $2,500 и/или до 1 года (MIS); до $10,000 и/или до 3 лет (FEL).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=632
+SAPC||§ 640|Безбилетный проезд|MISDEMEANOR|Умышленное пользование общественным транспортом без действительного билета/оплаты; поддельный/чужой проездной документ. Наказание: штраф до $250; при отягчающих — до 6 месяцев и/или до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=640
+SAPC||§ 646.9|Преследование (Stalking)|WOBBLER|Каждое лицо, которое умышленно преследует или угрожает другому человеку, что этот человек обоснованно опасается за свою безопасность или за безопасность своих близких. Наказание (MISDEMEANOR): тюремное заключение в окружной тюрьме до 1 года и/или штраф до $1,000. Наказание (FELONY): тюремное заключение в государственной тюрьме сроком от 16 месяцев до 3 лет и/или штраф до $10,000. Если преступление совершено при наличии действующего судебного запрета — автоматически квалифицируется как FELONY, с наказанием до 3 лет лишения свободы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=646.9
+SAPC||§ 647|Нарушения общественной морали|MISDEMEANOR|Проституция, попрошайничество, непристойное поведение, бродяжничество. До 6 месяцев окружной тюрьмы, штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=647.&lawCode=PEN
+SAPC||§ 647(c)|Нарушение пешеходного движения (Obstructing Sidewalk)|MISDEMEANOR|Создание препятствий движению по тротуару или улице. До 90 дней окружной, штраф до $400.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=647.&lawCode=PEN
+SAPC||§ 647(f)|Публичное опьянение (Public intoxication)|MISDEMEANOR|Нахождение в общественном месте в состоянии опьянения, при котором лицо не способно заботиться о безопасности (своей/чужой) и/или препятствует свободному пользованию улицей/тротуаром/путём. Наказание: до $1,000 и/или до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=647&lawCode=PEN
+SAPC||§ 647(j)|Скрытая съёмка или подглядывание|MISDEMEANOR|Незаконная скрытая съёмка/запись или наблюдение за человеком в частном месте. Наказание: до $1,000 и/или до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=647
+SAPC||§ 653(m)|Навязчивые, угрожающие или непристойные телефонные звонки|MISDEMEANOR|Повторные звонки/сообщения или электронная связь с намерением раздражать, угрожать или беспокоить; передача угроз/оскорблений/непристойного контента. Наказание: до 6 месяцев и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=653m
+SAPC||§ 653.22|Бродяжничество с целью проституции|MISDEMEANOR|Находиться в общественном месте с целью предложения или поиска сексуальных услуг. До 6 месяцев окружной тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=653.22.&lawCode=PEN
+SAPC||§ 653x|Злоупотребление системой экстренных вызовов 911|MISDEMEANOR|Лицо, которое звонит или использует электронное устройство для инициирования связи с системой экстренных вызовов 911 с целью надоесть или преследовать другого человека, признаётся виновным в совершении проступка. Намерение надоесть или преследовать устанавливается доказательством повторяющихся звонков или сообщений в течение некоторого времени, каким бы коротким оно ни было, которые являются неразумными в данных обстоятельствах. Штраф до $1,000, лишение свободы в окружной тюрьме до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=653x
+SAPC||§ 664|Попытка совершить преступление|INFO|Каждое лицо, которое пытается совершить преступление, но терпит неудачу или ему мешают или его останавливают при совершении преступления, подлежит наказанию в виде половины срока или штрафа, предусмотренного за завершенное преступление. В случае если наказание за преступление подразумевает пожизненное заключение, то человек наказывается лишением свободы до 5, 7 или 9 лет. Исключение: попытка совершения убийства первой степени (§190(a)) будет наказываться заключением от 15 лет до пожизненного.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=664.
+SAPC||§ 836.6|Побег из-под стражи|WOBBLER|Побег или попытка побега при аресте или задержании сотрудником полиции. Наказание: штраф до $1 000 и/или арест до 1 года (MIS); штраф до $10 000 и/или арест до 3-х лет (FEL).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=836.6.&lawCode=PEN
+SAPC||§ 978.5|Судебный ордер на арест (Bench Warrant)|INFO|Суд может выдать судебный ордер на арест, если обвиняемый не является в суд в назначенное время после освобождения под залог, под подписку о явке, по повестке или в связи с неоплатой штрафа. Ордер действует на территории любого округа и позволяет задержать лицо для доставки в суд.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=978.5.&lawCode=PEN
+SAPC||§ 1203.2|Нарушение условий пробации / УДО|INFO|При наличии оснований полагать, что лицо нарушило условия пробации или условно досрочного освобождения, сотрудник может произвести повторный арест без ордера. С дальнейшим решением суда об отмене освобождения.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=1203.2
+SAPC||§ 1320|Неявка в суд|MISDEMEANOR|Неявка в суд без уважительной причины по вызову (обвиняемый/свидетель/слушание). Наказание: до 1 года и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=1320&lawCode=PEN
+SAPC||§ 16700|Определение имитационного огнестрельного оружия|INFO|Имитационное огнестрельное оружие означает любое устройство, включая игрушечное или реплицированное оружие, которое настолько похоже по виду и цвету на настоящее, что разумный человек мог бы принять его за реальное.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=16700
+SAPC||§ 18710|Владение взрывных устройств|FELONY|Незаконное хранение бомб, гранат, самодельных взрывных устройств. До 3 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=18710.&lawCode=PEN
+SAPC||§ 18720|Изготовление взрывчатки|FELONY|Изготовление или сборка взрывных устройств. Наказание — 2–4 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=18720.&lawCode=PEN
+SAPC||§ 18725|Продажа или передача взрывных устройств|FELONY|Передача или сбыт взрывных устройств. До 4 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=18725.&lawCode=PEN
+SAPC||§ 18730|Перевозка или хранение взрывных устройств|FELONY|Перемещение или укрытие взрывных устройств. До 4 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=18730.&lawCode=PEN
+SAPC||§ 18740|Использование взрывных устройств|FELONY|Применение взрывного устройства с целью причинить вред. До 7 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=18740.&lawCode=PEN
+SAPC||§ 18745|Взрыв жилого здания или транспорта|FELONY|Использование взрывчатки против жилья или транспорта. Наказание — 4–10 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=18745.&lawCode=PEN
+SAPC||§ 18750|Взрыв с тяжкими последствиями|FELONY|Взрывчатка, повлекшая смерть или серьёзные увечья. Наказание — пожизненное заключение.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=18750.&lawCode=PEN
+SAPC||§ 18755|Использование при отягчающих обстоятельствах|FELONY|Применение взрывного устройства, повлёкшее смерть или тяжкие последствия. Наказание — пожизненное.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=18755.&lawCode=PEN
+SAPC||§ 19706|Уклонение от уплаты налогов|FELONY|Умышленное уклонение от уплаты налога: сокрытие доходов, занижение базы, ложная декларация или иное мошенническое уменьшение налоговых обязательств. Наказание: до 3 лет и/или штраф до $20,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=19706&lawCode=RTC
+SAPC||§ 20170|Демонстрация имитационного оружия в общественном месте|WOBBLER|Никто не может открыто демонстрировать или показывать имитационное огнестрельное оружие в общественном месте. За первое нарушение предусмотрен штраф (INFRACTION) в размере 100 $, за второе — 300 $, а за третье и последующие — уголовное правонарушение (MISDEMEANOR) с возможным арестом до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=20170
+SAPC||§ 21310|Скрытое ношение холодного оружия|WOBBLER|Скрытое ношение холодного оружия, готового к применению как колюще-режущее. Исключение: открытая переноска в ножнах не является скрытым ношением. Наказание: до $1,000 и/или до 1 года (MIS); до 3 лет и/или до $10,000 (FEL).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=21310.
+SAPC||§ 21510|Превышение длины клинка выкидного/автоматического ножа|MISDEMEANOR|Запрещено носить/иметь в доступной зоне авто/хранить в общественном месте/продавать или передавать выкидные/автоматические ножи с клинком 2+ дюйма. Наказание: конфискация, до $1,000 и/или до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=21510.
+SAPC||§ 23920|Владение оружием с измененным серийным номером|MISDEMEANOR|Лицо, которое с осознанием того, что идентификация оружия изменена или удалена, владеет, покупает, продаёт, передаёт или предлагает к продаже такое оружие — признаётся виновным. До 1 года в окружной тюрьме/Штраф до 1.000$|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23920&lawCode=PEN
+SAPC||§ 25400|Скрытое оружие (CCW)|WOBBLER|Незаконное скрытое ношение огнестрела. Наказание (§ 25400(c)): до 1 года окружной или 16 мес.–3 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=25400.&lawCode=PEN
+SAPC||§ 25610|Нарушение правил транспортировки огнестрельного оружия|WOBBLER|Лицо должно перевозить огнестрельное оружие разряженным и в запертом контейнере, чехле или багажнике, если транспортируется вне места постоянного хранения. Штраф до $1,000 и/или до 6 месяцев в окружной тюрьме. Felony - при отягчающих обстоятельствах.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=25610&lawCode=PEN
+SAPC||§ 25850|Заряженное оружие в публичном месте|WOBBLER|Владение заряженным огнестрелом в общественном месте. Наказание (§ 25850(c)): до 1 года окружной или 16 мес.–3 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=25850.&lawCode=PEN
+SAPC||§ 26100|Стрельба из автомобиля|FELONY|Стрельба из авто или по нему. Наказание (§ 26100(d)): 3–7 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=26100.&lawCode=PEN
+SAPC||§ 26350|Открытое ношение пистолета|MISDEMEANOR|Открытое ношение незаряженного пистолета/револьвера в общественном месте. До 1 года окружной тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=26350.&lawCode=PEN
+SAPC||§ 27545|Незаконная продажа оружия|FELONY|Передача или продажа огнестрельного оружия без лицензированного посредника (FFL). До 4 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27545.&lawCode=PEN
+SAPC||§ 29800|Владение оружием запрещёнными лицами|FELONY|Запрещено владение огнестрелом лицами с фелони или наркозависимостью. Наказание — до 3 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=29800.&lawCode=PEN
+SAPC||§ 29805|Владение оружием после судимости (Misdemeanor)|MISDEMEANOR|Лица с судимостью за насильственное misdemeanor не могут владеть оружием 10 лет. Нарушение — до 1 года окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=29805.&lawCode=PEN
+SAPC||§ 29900|Владение оружием после тяжких фелони|FELONY|Владение огнестрелом после осуждения за особо тяжкие преступления (убийство, ADW и др.). Наказание — до 3 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=29900.&lawCode=PEN
+SAPC||§ 30305|Незаконное хранение боеприпасов|WOBBLER|Владение патронами лицами, которым запрещено владеть оружием. До 1 года окружной (misd.) или до 3 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=30305.&lawCode=PEN
+SAPC||§ 30310|Незаконная передача боеприпасов|MISDEMEANOR|Продажа или передача патронов без лицензии. До 6 месяцев окружной тюрьмы и штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=30310.&lawCode=PEN
+SAPC||§ 30600|Штурмовое оружие и .50 BMG|FELONY|Производство, продажа или передача штурмового оружия или винтовок .50 BMG. Наказание — 4–8 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=30600.&lawCode=PEN
+SAPC||§ 30605|Владение штурмовым оружием|FELONY|Незаконное хранение штурмового оружия или .50 BMG. Наказание — до 3 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=30605.&lawCode=PEN
+SAPC||§ 33600|Изготовление или хранение самодельного оружия|WOBBLER|Каждое лицо, которое производит, импортирует, предлагает к продаже, передаёт или хранит так называемое zip gun - самодельное оружие, не соответствующее заводским стандартам безопасности. Лишение свободы до 1 года в окружной тюрьме или до 3 лет в зависимости от обстоятельств.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PEN&sectionNum=33600
+SAVC||§ 2800|Невыполнение приказа инспектора SAHP|MISDEMEANOR|Водитель коммерческого ТС обязан подчиняться требованиям инспектора SAHP. Наказание — до 6 мес. окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=2800.&lawCode=VEH
+SAVC||§ 2800.1|Уклонение от полиции|MISDEMEANOR|Умышленное уклонение или отказ водителя остановится после поданного сигнала. Наказание: штраф до $1 000 и/или арест до 1 года.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=2800.1.&lawCode=VEH
+SAVC||§ 2800.2|Уклонение с опасным вождением|FELONY|Побег от полиции с нарушением правил, создающим опасность для жизни. Наказание — 16 мес.–3 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=2800.2.&lawCode=VEH
+SAVC||§ 2800.3|Уклонение с причинением вреда|FELONY|Побег от полиции, повлекший тяжкие телесные повреждения или смерть. Наказание: 3–7 лет (при травмах) или 4–10 лет (при смерти).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=2800.3.&lawCode=VEH
+SAVC||§ 2800.4|Уклонение по встречке/тротуарам|FELONY|Побег от полиции с движением по встречке или по тротуарам. Наказание — 6 мес.–1 год окружной или до 3 лет тюрьмы штата.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=2800.4.&lawCode=VEH
+SAVC||§ 2801|Отказ подчиниться регулировщику|MISDEMEANOR|Запрещено игнорировать указания полицейского/регулировщика при управлении движением. До 6 месяцев окружной тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=2801.&lawCode=VEH
+SAVC||§ 2807|Осмотр автобусов и школьного транспорта|MISDEMEANOR|Автобусы и школьные транспортные средства должны проходить регулярные осмотры SAHP. Нарушение — misdemeanor.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=2807.&lawCode=VEH
+SAVC||§ 2814.2|Отказ остановиться на DUI Checkpoint|MISDEMEANOR|Водитель обязан остановиться на контрольном пункте полиции. Наказание — до 6 месяцев окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=2814.2.&lawCode=VEH
+SAVC||§ 2818|Объезд дорожного блока/ограждения|INFRACTION|Запрещено игнорировать блокпосты и временные ограждения (например, SAHP). Штраф до $500 или до 6 месяцев окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=2818.&lawCode=VEH
+SAVC||§ 4000|Вождение или парковка без регистрации|INFRACTION|Запрещено управлять автомобилем или парковать его на дорогах общего пользования без действующей регистрации. В случае просрочки регистрации более, чем на 2 месяцев, в случае повторного нарушения, а также в случае невозможности связаться с владельцем припаркованного автомобиля, автомобиль подлежит эвакуации. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=4000.&lawCode=VEH
+SAVC||§ 4150|Несоответствие автомобиля его регистрационным данным|INFRACTION|Регистрационные данные автомобиля должны содержать корректные и актуальные данные о владельце, марке, кузове и модели авто, а также о его цвете, VIN-номере и актуальных модификациях. Наказание: штраф до $200.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=4150.
+SAVC||§ 4462|Непредъявление регистрации|INFRACTION|Водитель обязан предъявить свидетельство о регистрации ТС по требованию полиции. От штрафа до 6 месяцев окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=4462.&lawCode=VEH
+SAVC||§ 4463|Мошенничество при регистрации транспортного средства|WOBBLER|Запрещено умышленно подделывать, изменять, фальсифицировать или использовать с целью обмана любые официальные документы или номерные знаки, включаяя подделку самих металлических номеров, наклеек (стикеров) о регистрации, регистрационных карт или свидетельств о праве собственности. Наказание: MIS - лишение свободы до 1 года и/или штраф до $1000, FEL - лишение свободы до 3 лет и штраф до $10000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=4463&lawCode=VEH
+SAVC||§ 5200|Отсутствие государственных номеров|INFRACTION|Транспортное средство должно иметь номерные знаки департамента, установленные спереди и сзади. Если конструкция допускает установку только одного знака, он должен быть размещён сзади. Штраф - до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=5200.&lawCode=VEH
+SAVC||§ 5201|Неправильное крепление или скрытие номеров|INFRACTION|Номера должны быть чистыми, видимыми и закреплёнными без искажений. Штраф — до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=5201.&lawCode=VEH
+SAVC||§ 5204|Нарушение правил, связанных с регистрационными наклейками (стикерами)|WOBBLER|Актуальные регистрационные наклейки (стикеры), выданные DMV, должны быть надлежащим образом прикреплены (приклеены) к заднему номерному знаку автомобиля в специально отведенном месте. Если регистрационная информация стикера просрочена более, чем на два месяца, автомобиль подлежит эвакуации. Наказание: штраф до $25.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=5204&lawCode=VEH
+SAVC||§ 10751|Владение транспортным средством с изменённым VIN|WOBBLER|Владение автомобилем или его частью, если идентификационный номер (VIN) был изменен. Любой автомобиль который попадает под стражу, подлежит изъятию и утилизации. Наказание: арест до 6 месяцев и/или штраф до $1000 (MIS); арест до 3 лет и/или штраф до $5000 (FEL)|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=10751
+SAVC||§ 10801|Владение или управление точкой разборки угнанных автомобилей|WOBBLER|Владение или управление местом, где осуществляется хранение или продажа автомобилей или их частей, полученных преступным путём. Наказание: арест до 1 года и/или штраф до $1,000 (MIS); арест до 4 года тюрьмы и/или штраф до $50,000 (FEL).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=10801
+SAVC||§ 10802|Изменение VIN с целью сокрытия или продажи|WOBBLER|Умышленное изменение идентификационного номера (VIN) с целью сокрытия или для передачи автомобиля или его частей. Наказание: арест до 1 года и/или штраф до $1,000 (MIS); арест до 3 года тюрьмы и/или штраф до $25,000 (FEL).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=10802
+SAVC||§ 10855|Невозврат арендованного транспортного средства|INFO|Лицо, которое арендовало автомобиль по договору и умышленно не вернуло его владельцу в течение 5 дней после истечения срока аренды, считается совершившим присвоение (SAPC § 487/503).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=10855
+SAVC||§ 10856|Вмешательство в эвакуацию|MISDEMEANOR|Запрещается мешать законной эвакуации или транспортировке автомобиля. Наказание: штраф до $1 000 и/или до 1 года ареста.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=10856
+SAVC||§ 12500|Вождение без лицензии|WOBBLER|Управление транспортным средством при отсутствии права управления транспортными средствами соответствующей категории, подтверждающего право управления или наличие необходимых разрешений. INF — штраф до $250. MIS — штраф до $1,000 и/или до 6 месяцев окружной тюрьмы (для повторных нарушений или при отягчающих обстоятельствах).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=12500.&lawCode=VEH
+SAVC||§ 12814.6|Нарушение ограничений водительской лицензии несовершеннолетнего|INFRACTION|Несовершеннолетнему водителю запрещается управлять с 23:00 до 5:00 и перевозить пассажиров младше 20 лет без законного основания. Наказание: первый штраф до $35, за второй штраф и последующие до $50|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=12814.6
+SAVC||§ 12951|Отсутствие водительского удостоверения при себе|INFRACTION|Водитель обязан иметь при себе и предъявить права по требованию полиции. Нарушение — штраф (infraction), отказ предъявить — misdemeanor (до 6 мес. окружной).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=12951.&lawCode=VEH
+SAVC||§ 14601|Вождение при лишённых правах|MISDEMEANOR|Управление при приостановленных или аннулированных правах. До 6 месяцев окружной тюрьмы и штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=14601.&lawCode=VEH
+SAVC||§ 14601.2|Вождение при лишении за DUI|MISDEMEANOR|Вождение авто после лишения прав за DUI. Минимум 10 дней, максимум 6 месяцев окружной тюрьмы и штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=14601.2.&lawCode=VEH
+SAVC||§ 14601.5|Вождение при административном лишении (отказ от теста)|MISDEMEANOR|Вождение при приостановке лицензии из-за отказа от теста на алкоголь/наркотики. До 6 месяцев окружной тюрьмы и штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=14601.5.&lawCode=VEH
+SAVC||§ 14610|Незаконное отображение или владение аннулированной / отозванной / приостановленной водительской лицензией|MISDEMEANOR|Умышленное использование, демонстрация, передача или хранение водительской лицензии, заведомо аннулированной, отозванной, приостановленной, поддельной или недействительной, является правонарушением. К нарушению также относятся подделка, изменение, копирование, продажа, передача лицензии и использование лицензии другого лица. Штраф до $1,000, лишение свободы в окружной тюрьме до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=14610
+SAVC||§ 16028|Отсутствие / отказ предоставить доказательства финансовой ответственности (вождение без страховки)|INFRACTION|Все водители и владельцы моторных транспортных средств обязаны в любое время иметь действующее доказательство финансовой ответственности (страховки) и предъявлять его по запросу офицера полиции (включая электронный формат на мобильном устройстве). Доказательство может включать страховой полис, сертификат самострахования или депозит в DMV. Штраф за первое нарушение от $100 до $200, за последующие в течение трех лет - от $200 до $500|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=16028.&lawCode=VEH
+SAVC||§ 20001|ДТП с ранеными/смертью (Hit and Run)|FELONY|Водитель обязан остановиться, оказать помощь и сообщить в полицию. За побег — 16 мес.–4 лет тюрьмы и штраф $1,000–$10,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=20001.&lawCode=VEH
+SAVC||§ 20002|ДТП с материальным ущербом|MISDEMEANOR|Водитель обязан остановиться и обменяться данными. За побег — до 6 месяцев окружной тюрьмы и штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=20002.&lawCode=VEH
+SAVC||§ 20003|Обязанность сообщить сведения о ДТП|WOBBLER|Водитель обязан предоставить данные о себе и пострадавших. За нарушение — до 1 года окружной (misd.) или до 4 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=20003.&lawCode=VEH
+SAVC||§ 20004|ДТП со смертельным исходом — сообщение властям|FELONY|При аварии со смертью водитель обязан незамедлительно сообщить в полицию/шерифу. За нарушение — 90 дней до 1 года окружной или 2–4 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=20004.&lawCode=VEH
+SAVC||§ 21200|ПДД для велосипедистов|INFRACTION|Велосипедисты обязаны соблюдать ПДД: движение по полосам, сигналы поворота, освещение ночью. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21200.&lawCode=VEH
+SAVC||§ 21200.5|Вождение велосипеда под алкоголем|MISDEMEANOR|Запрещено управлять велосипедом в состоянии алкогольного/наркотического опьянения. До $250 штрафа.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21200.5.&lawCode=VEH
+SAVC||§ 21203|Запрещено цепляться за транспортное средство|INFRACTION|Запрещается, будучи на мотоцикле/велосипеде или ином подобном устройстве, цепляться за другое транспортное средство во время движения по проезжей части. Наказание: штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21203
+SAVC||§ 21210|Неправильная парковка велосипеда|INFRACTION|Запрещается оставлять велосипед лежащим на тротуаре или парковать его таким образом, чтобы он препятствовал свободному проходу пешеходов. Наказание: штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21210
+SAVC||§ 21211|Препятствование движению на велосипедной дорожке|INFRACTION|Запрещается находиться или размещать любые предметы на велосипедной дорожке, если это мешает движению. Наказание: штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21211
+SAVC||§ 21212|Велосипедисты без шлема (до 18 лет)|INFRACTION|Дети и подростки обязаны ездить в шлеме. Нарушение — штраф $25.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21212.&lawCode=VEH
+SAVC||§ 21213|Ограничения для электрических велосипедов (возраст и шлем)|INFRACTION|Лицо в возрасте до 16 лет не имеет права управлять электрическим велосипедом. Также водитель и пассажир обязаны использовать шлем. Наказание: штраф $25.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21213
+SAVC||§ 21453|Проезд на красный свет|INFRACTION|Водитель обязан остановиться на красный сигнал светофора. Нарушение — штраф $100–$500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21453.&lawCode=VEH
+SAVC||§ 21457|Игнорирование мигающего красного (Stop Signal)|INFRACTION|Водитель обязан полностью остановиться на мигающий красный сигнал. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21457.&lawCode=VEH
+SAVC||§ 21460|Пересечение двойной сплошной|INFRACTION|Запрещено пересекать двойную сплошную линию разметки, кроме разрешённых случаев. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21460.&lawCode=VEH
+SAVC||§ 21461|Нарушение дорожных знаков и сигналов|INFRACTION|Запрещено игнорировать знаки «Stop», «Yield» и иные предписывающие знаки. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21461.&lawCode=VEH
+SAVC||§ 21464|Вмешательство или порча устройств регулирования движения|WOBBLER|Запрещено портить/снимать/сбивать/загораживать или иначе вмешиваться в работу устройств регулирования движения (светофоры, знаки и др.). Наказание: до 6 мес. и/или $5,000 (MIS); до 3 лет и/или $10,000 при травмах/смерти (FEL).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21464
+SAVC||§ 21650.1|Движение велосипеда в том же направлении, что и транспортные средства|INFRACTION|Велосипедист обязан двигаться по проезжей части или обочине в том же направлении, что и транспортные средства. Штраф: до $197.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21650.1
+SAVC||§ 21651(a)|Пересечение разделительной разметки/зоны|INFRACTION|Запрещено движение через разделительные барьеры или разметку разделенного шоссе, а также выполнение левых поворотов и разворотов, кроме специально обозначенных мест. Штраф до 250$.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21651.
+SAVC||§ 21651(b)|Движение по полосе встречного движения|WOBBLER|Запрещено движение по любой части проезжей части, кроме правой. Исключение — объезд препятствия, если он выполняется безопасно и не создает помех другим участникам движения.MIS — Штраф до $1000 и/или тюремное заключение до 1 года в окружной тюрьме. FEL — Привело к травмам/смерти - тюремное заключение от 16 месяцев до 3 лет в тюрьме штата и штраф до $10000, изъятие DL.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21651
+SAVC||§ 21654|Движение на шоссе со скоростью ниже обычной|INFRACTION|Движение на шоссе со скоростью ниже обычной скорости потока в левой полосе, когда правая свободна, за исключением обгона или поворота налево. Наказание: штраф от $150 до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21654
+SAVC||§ 21658.1|Lane Splitting (между полосами)|INFO|В Сан-Андреас разрешено движение мотоциклов между полосами при соблюдении разумной осторожности.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21658.1.&lawCode=VEH
+SAVC||§ 21663|Движение по тротуару|INFRACTION|Управление транспортным средством по тротуару, вместо проезжей части дороги. Штраф от 100$ до 500$.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21663.
+SAVC||§ 21703|Несоблюдение дистанции|INFRACTION|Водитель механического транспортного средства не должен следовать за другим транспортным средством на более близком расстоянии, чем это разумно и целесообразно, с учётом скорости такого транспортного средства, интенсивности движения и состояния проезжей части. Наказание: штраф до 250$.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=21703
+SAVC||§ 21706|Следование слишком близко за экстренными ТС|INFRACTION|Запрещено ехать на расстоянии ближе 300 футов за машиной экстренных служб с включенными огнями и сиренами. Штраф до $500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21706.&lawCode=VEH
+SAVC||§ 21712|Перевозка людей в местах, не предназначенных для этого|INFRACTION|Перевозка людей в не предназначенной для этого местах, включая багажник, внешние части автомобиля, буксируемые транспортные средства и т.д. Наказание: штраф $100 (1-ое); штраф $200 (2-ое); штраф $250 (3-е и далее).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21712.&lawCode=VEH
+SAVC||§ 21718|Остановка на автомагистрали|INFRACTION|Остановка или парковка на автомагистрали, кроме аварийных случаев. Наказание: штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21718.&lawCode=VEH
+SAVC||§ 21750|Неправильный обгон|INFRACTION|Обгон без соблюдения условий безопасности. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21750.&lawCode=VEH
+SAVC||§ 21755|Опасный обгон справа|INFRACTION|Опасный обгон справа при отсутствии условий безопасности. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21755.&lawCode=VEH
+SAVC||§ 21801|Нарушение правила разворота/левого поворота|INFRACTION|При развороте или левом повороте водитель обязан уступить встречному транспорту. Штраф — до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21801.&lawCode=VEH
+SAVC||§ 21802|Нарушение Stop (уступи дорогу)|INFRACTION|Водитель обязан уступить движение при знаке Stop. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21802.&lawCode=VEH
+SAVC||§ 21804|Выезд со второстепенной дороги|INFRACTION|Водитель обязан уступить транспортным средствам на главной дороге. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21804.&lawCode=VEH
+SAVC||§ 21806|Не уступил дорогу экстренным службам|INFRACTION|Водитель обязан останавливаться при включённых красных сигналах и сирене. Штраф до $500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21806.&lawCode=VEH
+SAVC||§ 21950|Нарушение правил пешеходами|INFRACTION|Пешеход обязан переходить дорогу по переходу и уступать движению, если внезапно выбегает. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21950.&lawCode=VEH
+SAVC||§ 21955|Jaywalking (переход вне перехода)|INFRACTION|Пешеход обязан пересекать дорогу по зебре или на зелёный сигнал. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21955.&lawCode=VEH
+SAVC||§ 21957|Хождение по проезжей части|INFRACTION|Запрещено двигаться пешком по проезжей части вне тротуара или обочины. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21957.&lawCode=VEH
+SAVC||§ 21970|Блокирование пешеходного перехода|INFRACTION|Запрещено останавливать авто на crosswalk, создавая помехи пешеходам. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21970.&lawCode=VEH
+SAVC||§ 22100|Нарушение правил выполнения поворота направо|INFRACTION|При повороте направо, водитель обязан занять крайнее правое положение. Наказание: штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=22100
+SAVC||§ 22101|Нарушение правил поворота|INFRACTION|Движение вразрез установленным знакам/разметке при поворотах. Штраф — до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22101.&lawCode=VEH
+SAVC||§ 22104|Разворот у пожарной станции|INFRACTION|Запрещён U-разворот перед въездом на территорию пожарной станции/подъездами к ней, а также использование этих въездов/подъездов для разворота. Штраф: $238–$500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=22104
+SAVC||§ 22105|Разворот при ограниченном обзоре (200 футов)|INFRACTION|Запрещён U-разворот на дороге, если у водителя нет беспрепятственного обзора на 200 футов в обе стороны. Штраф: $238–$500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22105.&nodeTreePath=15.6&lawCode=VEH
+SAVC||§ 22106|Небезопасное начало движения или движение задним ходом|INFRACTION|Запрещено начинать движение после остановки/стоянки или двигаться задним ходом, пока это не может быть совершено с разумной безопасностью. Штраф: $238–$500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22106.&nodeTreePath=15.6&lawCode=VEH
+SAVC||§ 22107|Неподача сигнала (поворотник) при перестроении|INFRACTION|Запрещено менять направление/полосу, пока манёвр не может быть выполнен с разумной безопасностью, и без подачи соответствующего сигнала. Штраф: $238–$500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=22107
+SAVC||§ 22108|Неподача сигнала (поворотник) при повороте|INFRACTION|Сигнал поворота вправо/влево должен подаваться непрерывно на последних 100 футах перед поворотом. Штраф: $238–$500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=22108
+SAVC||§ 22109|Резкое снижение скорости или остановка без сигнала|INFRACTION|Запрещено останавливаться или резко снижать скорость без предварительного сигнала водителю, следующему непосредственно позади, при наличии возможности подать сигнал. Штраф: $238–$500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=22109
+SAVC||§ 22350|Превышение скорости (Basic Speed Law)|INFRACTION|Движение на скорости, небезопасной для условий дороги, трафика или погоды. Штраф от $35 до $500, при аварии — до 90 дней окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22350.&lawCode=VEH
+SAVC||§ 22400|Создание препятствия|INFRACTION|Водитель, который ограничивает движение трафика или останавливается там, где это не предусмотрено при нормальном движении потока транспортных средств. Штраф до $240.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=22400
+SAVC||§ 22406|Ограничение скорости грузовиков|INFRACTION|Грузовики, автобусы, авто с прицепами — максимум 55 mph. Штраф $100–$500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22406.&lawCode=VEH
+SAVC||§ 22454|Отказ от остановки при мигающих красных сигналах школьного автобуса|INFRACTION|Водитель, подъезжающий к/обгоняющий школьный автобус с включёнными красными мигающими огнями и выдвинутым стоп-указателем, обязан полностью остановиться и оставаться стоять, пока сигнал не будет выключен и автобус не начнёт движение. Штраф до $695.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22454.&lawCode=VEH
+SAVC||§ 22500|Неправильная парковка|INFRACTION|Запрещена парковка в определённых местах (тротуар, пожарный гидрант, перекрёсток). Штраф — до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22500.&lawCode=VEH
+SAVC||§ 22502|Парковка у бордюра|INFRACTION|Транспортное средство должно располагаться параллельно и не далее 18 дюймов от бордюра. Запрещается парковка против направления движения, за исключением дорог с односторонним движением, где разрешена парковка у левого края проезжей части. Штраф — до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=22502.
+SAVC||§ 22508|Парковка при неуплаченном парковочном времени|INFRACTION|Остановка или стоянка на месте, оборудованном парковочным счётчиком, либо на публичной платной парковке, без внесения необходимой оплаты, либо стоянка сверх оплаченного времени. Штраф от 40$ до 80$ в зависимости от юрисдикции (город/округ).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22508&lawCode=VEH
+SAVC||§ 22511.1|Парковка на месте для инвалидов без разрешения|INFRACTION|Запрещено занимать парковочные места для инвалидов без соответствующего пермита. Штраф $250–$1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22511.1.&lawCode=VEH
+SAVC||§ 22514|Парковка у пожарного гидранта|INFRACTION|Запрещено парковаться ближе 15 футов (~5 м) к пожарному гидранту. Штраф до $100.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22514.&lawCode=VEH
+SAVC||§ 22515|Оставление авто без тормоза|INFRACTION|При парковке на уклоне водитель обязан включить тормоз и вывернуть колёса. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22515.&lawCode=VEH
+SAVC||§ 22517|Открытие дверей на проезжей части|INFRACTION|Запрещено открывать двери, мешая движению или создавая опасность велосипедистам. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22517.&lawCode=VEH
+SAVC||§ 22522|Парковка на тротуаре/пандусе|INFRACTION|Запрещено парковать авто на тротуарах и у пандусов для инвалидов. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22522.&lawCode=VEH
+SAVC||§ 22526|Gridlock (блокирование перекрёстка)|INFRACTION|Запрещено выезжать на перекрёсток, если невозможно освободить его. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=22526.&lawCode=VEH
+SAVC||§ 23103|Опасное вождение (Reckless Driving)|MISDEMEANOR|Вождение «с сознательным пренебрежением к безопасности». Наказание — 5–90 дней окружной и штраф $145–$1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23103.&lawCode=VEH
+SAVC||§ 23104|Reckless Driving с травмами|WOBBLER|Опасное вождение, повлёкшее телесные повреждения. Наказание — до 6 мес. окружной (misd.) или 16 мес.–3 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23104.&lawCode=VEH
+SAVC||§ 23109|Уличные гонки (Speed Contest)|WOBBLER|Участие в гонках или дрифт-шоу на дорогах общего пользования. 24 часа–90 дней окружной и штраф $355–$1,000. Повторно/с травмами — felony, до 3 лет.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23109.&lawCode=VEH
+SAVC||§ 23109(c)|Демонстрация скорости (Exhibition of Speed)|MISDEMEANOR|Умышленное буксование, дрифт или резкие старты на дороге общего пользования. Наказание — до 90 дней окружной тюрьмы и штраф $355–$1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23109.&lawCode=VEH
+SAVC||§ 23109.1|Уличные гонки с травмами|FELONY|Speed Contest, повлёкший телесные повреждения. Наказание — 16 мес.–3 лет тюрьмы.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23109.1.&lawCode=VEH
+SAVC||§ 23109.2|Зрители уличных гонок|MISDEMEANOR|Запрещено сознательно находиться и участвовать в качестве зрителя в нелегальных гонках. Штраф до $500 и/или до 6 месяцев окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23109.2.&lawCode=VEH
+SAVC||§ 23109.5|Организация уличных гонок|WOBBLER|Организация или помощь в проведении нелегальных гонок. Наказание — до 6 мес. окружной (misd.) или до 3 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23109.5.&lawCode=VEH
+SAVC||§ 23110|Бросание предметов в автомобили|WOBBLER|Бросание предметов в движущийся автомобиль. Наказание: до 6 мес. окружной (misd.) или 16 мес.–3 лет тюрьмы (felony) при травмах.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23110.&lawCode=VEH
+SAVC||§ 23111|Бросание мусора или окурков из авто|INFRACTION|Запрещено выбрасывать мусор или окурки из движущегося авто. Штраф $100–$1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23111.&lawCode=VEH
+SAVC||§ 23114|Перевозка груза без креплений|INFRACTION|Запрещено перевозить незакреплённый груз, создающий опасность. Штраф до $1,000, при тяжких последствиях — misdemeanor.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23114.&lawCode=VEH
+SAVC||§ 23116|Перевозка людей в кузове пикапа/на платформе грузовика на шоссе|INFRACTION|Перевозка людей в кузове пикапа или грузового автомобиля по шоссе без одобренной удерживающей системы. Наказание: штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23116.&lawCode=VEH
+SAVC||§ 23123|Использование телефона за рулём|INFRACTION|Запрещено держать мобильный телефон в руке при вождении (только hands-free). Штраф $20 за первое нарушение, $50 за повторное.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23123.&lawCode=VEH
+SAVC||§ 23123.5|Текстинг за рулём|INFRACTION|Запрещено набирать текстовые сообщения во время движения (даже с телефоном в держателе). Штраф $20 за первое нарушение, $50 за повторное.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23123.5.&lawCode=VEH
+SAVC||§ 23140|DUI для несовершеннолетних|INFRACTION|Для водителей до 21 лет уровень BAC ≥0.01% уже считается DUI. Наказание — штраф $100–$250 и/или при рецидиве — до 6 месяцев окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23140.&lawCode=VEH
+SAVC||§ 23152|DUI (алкоголь/наркотики)|WOBBLER|Управление авто с BAC ≥0.08% или под действием наркотиков. 1-е нарушение: штраф $390–$1,000 и до 6 мес. окружной. При рецидиве/жертвах — felony, до 3 лет.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23152.&lawCode=VEH
+SAVC||§ 23153|DUI с причинением вреда|FELONY|Вождение в состоянии опьянения, повлекшее телесные повреждения. Наказание — 16 мес.–4 лет тюрьмы и штраф до $5,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23153.&lawCode=VEH
+SAVC||§ 23222|Открытая тара (Open Container)|INFRACTION|Запрещено держать открытые бутылки алкоголя или каннабиса в салоне (кроме багажника). Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23222.&lawCode=VEH
+SAVC||§ 23224|Алкоголь в машине у лиц до 21 года|MISDEMEANOR|Водителям и пассажирам младше 21 запрещено иметь алкоголь в салоне авто. До $1,000 штраф и/или до 6 месяцев окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23224.&lawCode=VEH
+SAVC||§ 23536|Наказания за первое DUI|INFO|Минимум 96 часов — максимум 6 месяцев окружной, штраф $390–$1,000, лицензия — приостановка на 6 мес.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23536.&lawCode=VEH
+SAVC||§ 23540|Второе DUI в течение 10 лет|MISDEMEANOR|90 дней — 1 год окружной, штраф $390–$1,000, лицензия — приостановка 2 года.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23540.&lawCode=VEH
+SAVC||§ 23546|Третье DUI в течение 10 лет|WOBBLER|120 дней — 1 год окружной или до 3 лет тюрьмы штата. Лицензия — лишение на 3 года.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23546.&lawCode=VEH
+SAVC||§ 23550|Четвёртое DUI (habitual offender)|FELONY|До 3 лет тюрьмы штата, штраф до $1,000, лицензия — лишение на 4 года.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23550.&lawCode=VEH
+SAVC||§ 23582|Усиление за опасное вождение при DUI|INFO|Если водитель при DUI ехал на высокой скорости и опасно, добавляется +60 дней к сроку.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=23582.&lawCode=VEH
+SAVC||§ 24002|Опасное техническое состояние ТС|INFRACTION|Запрещено управлять ТС в небезопасном состоянии, без требуемого оборудования или с неправильно закрепленным грузом. Наказание: штраф $190–$238.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=24002.&lawCode=VEH
+SAVC||§ 24003|Незаконные световые устройства|INFRACTION|Запрещены мигающие, красные/синие или иные огни, имитирующие полицейские. Штраф — до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=24003.&lawCode=VEH
+SAVC||§ 24400|Вождение без фар ночью|INFRACTION|Движение в тёмное время суток или при плохой видимости без включённых фар. Штраф — до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=24400.&lawCode=VEH
+SAVC||§ 24409|Использование дальнего света|INFRACTION|Водитель обязан переключать дальний свет фар при приближении встречных машин. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=24409.&lawCode=VEH
+SAVC||§ 24600|Неисправные задние фонари|INFRACTION|Авто должно иметь работающие задние фонари. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=24600.&lawCode=VEH
+SAVC||§ 24601|Подсветка номера|INFRACTION|Задний номер должен быть освещён в тёмное время суток. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=24601.&lawCode=VEH
+SAVC||§ 24603|Неисправные стоп-сигналы|INFRACTION|Автомобиль обязан иметь работающие стоп-сигналы. Нарушение — штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=24603.&lawCode=VEH
+SAVC||§ 25250|Запрещённые цветные огни|INFRACTION|Запрещены синие/красные огни и мигающие фонари, имитирующие экстренные службы. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=25250.&lawCode=VEH
+SAVC||§ 25251|Неправомерное использование аварийной сигнализации|INFRACTION|Использование аварийной сигнализации вне случаев опасности, аварии или неисправности автомобиля. Наказание: штраф до $500.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=25251.&nodeTreePath=17.2.7&lawCode=VEH
+SAVC||§ 25950|Некорректный цвет света передних фар транспортного средства|INFRACTION|Запрещено устанавливать на передние световые приборы лампы/плёнки/средства, из-за которых свет не белого или жёлтого спектра. Штраф: до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=25950.&lawCode=VEH
+SAVC||§ 26708|Тонировка лобового и передних стёкол|INFRACTION|Запрещена непрозрачная тонировка на передних окнах и лобовом стекле. Штраф — $25–$197.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=26708.&lawCode=VEH
+SAVC||§ 26710|Трещины на лобовом стекле|INFRACTION|Управление автомобилем с повреждённым лобовым стеклом, мешающим видимости. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=26710.&lawCode=VEH
+SAVC||§ 27001|Злоупотребление клаксоном|INFRACTION|Запрещено использовать клаксон без необходимости (только для предупреждения об опасности). Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27001.&lawCode=VEH
+SAVC||§ 27150|Громкая выхлопная система|INFRACTION|Запрещены глушители, создающие чрезмерный шум. Штраф — $25–$200, при повторных — до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27150.&lawCode=VEH
+SAVC||§ 27153|Избыточный выхлоп (дым)|INFRACTION|Запрещён чрезмерный дым или шум из выхлопной системы. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27153.&lawCode=VEH
+SAVC||§ 27156|Незаконные модификации двигателя|INFRACTION|Запрещены модификации, делающие авто небезопасным или нарушающим экологию. Штраф или до 6 мес. окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27156.&lawCode=VEH
+SAVC||§ 27315|Ремни безопасности|INFRACTION|Водитель и пассажиры обязаны быть пристёгнутыми. Нарушение — штраф $20 (водитель) и $20 за каждого непристёгнутого пассажира (первое нарушение), больше при рецидиве.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27315.&lawCode=VEH
+SAVC||§ 27360|Перевозка детей без автокресла|INFRACTION|Дети до 8 лет должны перевозиться в специальном детском удерживающем устройстве. Штраф — $100 за первое нарушение, $250 за повторное.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27360.&lawCode=VEH
+SAVC||§ 27400|Наушники за рулём (оба уха)|INFRACTION|Водителю запрещено использовать наушники/гарнитуру в обоих ушах одновременно. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27400.&lawCode=VEH
+SAVC||§ 27600|Опасные выступающие колёса|INFRACTION|Колёса и арки, выступающие за пределы кузова, считаются небезопасными. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27600.&lawCode=VEH
+SAVC||§ 27602|Видеоустройства, мешающие обзору|INFRACTION|Запрещено устанавливать экраны/видео перед водителем (кроме GPS и штатных систем). Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27602.&lawCode=VEH
+SAVC||§ 27803|Шлемы для мотоциклистов|INFRACTION|Водитель и пассажир мотоцикла обязаны использовать шлемы. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27803.&lawCode=VEH
+SAVC||§ 28071|Требование наличия бамперов на транспортном средстве|INFRACTION|Каждый зарегистрированный в этом штате автомобиль, должен быть оборудован передним и задним бампером. Исключение – заводская конструкция. Наказание: штраф до $250|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=28071
+SAVC||§ 28150|Устройства подавления полицейских радаров|MISDEMEANOR|Использование, покупка, продажа или хранение устройств, предназначенных для подавления работы полицейских радаров. Наказание: штраф до $1 000 и/или арест до 6 месяцев.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=28150
+SAVC||§ 29005|Ограничение длины сцепки при буксировке.|INFRACTION|При буксировке, длина буксировочного соединения не должна превышать 15 футов. Наказание: штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=29005
+SAVC||§ 31602|Опасные грузы (Hazmat)|WOBBLER|Перевозка взрывчатых/опасных веществ без разрешений. Наказание — штраф до $5,000 и/или до 1 года (misd.) либо 2–3 лет тюрьмы (felony).|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=31602.&lawCode=VEH
+SAVC||§ 34501.5|Часы работы водителей (HOS)|MISDEMEANOR|Дальнобойщики обязаны соблюдать лимиты по вождению и отдыху. Нарушение — misdemeanor.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=34501.5.&lawCode=VEH
+SAVC||§ 34501.12|Перегруз ТС|INFRACTION|Перевозка груза свыше допустимого веса или без надлежащего крепления. Штраф до $1,000, при серьёзном нарушении — misdemeanor.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=34501.12.&lawCode=VEH
+SAVC||§ 34506|Нарушения правил эксплуатации|MISDEMEANOR|Обязанность соблюдать стандарты безопасности (тормоза, свет, крепления груза). За нарушение — до 6 мес. окружной.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=34506.&lawCode=VEH
+SAVC||§ 34507.5|Вождение без инспекции SAHP|MISDEMEANOR|Коммерческие ТС обязаны проходить регулярные проверки SAHP. Нарушение — misdemeanor.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=34507.5.&lawCode=VEH
+SAVC||§ 38300|Нарушения на внедорожниках (OHV)|INFRACTION|Запрещено использовать внедорожные ТС (ATV, багги) вне специальных зон. Штраф до $250.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=38300.&lawCode=VEH
+SAVC||§ 40302|Отказ от подписания обязательства явки / тикета|MISDEMEANOR|Если арестованный за проступок (не тяжкое преступление) не может подтвердить личность, отказывается подписать обязательство явиться в суд, требует немедленной доставки к судье или обвиняется по статье DUI, его без задержки доставляют к ближайшему судье. Наказание определяется по основной статье, из-за которой был арест/штраф.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=40302
+SAVC||§ 40508|Невыполнение явки в суд по тикету или письменного обязательства|MISDEMEANOR|Любое лицо, которое умышленно не является в суд, не выплачивает назначенный залог или штраф в срок, либо не выполняет требования судебного постановления по делу о нарушении настоящего кодекса, виновно в совершении проступка, даже если позже исполнит свои обязательства. Тюремное заключение в окружной тюрьме до 6 месяцев и/или штраф до $1,000.|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=40508
+USC|8|§ 1324|Контрабанда и укрывательство нелегальных иммигрантов|FELONY|Перевозка, укрывательство или содействие въезду нелегальных мигрантов. До 10 лет, пожизненное при смерти пострадавших.|https://www.law.cornell.edu/uscode/text/8/1324
+USC|8|§ 1324(a)|Незаконное трудоустройство иммигрантов|FELONY|Осознанный найм нелегальных работников. Штраф до $3,000 за работника и до 6 мес. тюрьмы; при повторе — до 2 лет.|https://www.law.cornell.edu/uscode/text/8/1324a
+USC|8|§ 1325|Незаконное пересечение границы|WOBBLER|Первое нарушение — до 6 мес. (misdemeanor), повторное — до 2 лет (felony).|https://www.law.cornell.edu/uscode/text/8/1325
+USC|8|§ 1326|Повторный незаконный въезд|FELONY|Возвращение после депортации. До 2 лет, до 10 лет при тяжких судимостях.|https://www.law.cornell.edu/uscode/text/8/1326
+USC|8|§ 1327|Помощь преступникам во въезде|FELONY|Содействие въезду в США лиц, совершивших тяжкие преступления. До 10 лет.|https://www.law.cornell.edu/uscode/text/8/1327
+USC|8|§ 1328|Ввоз лиц для проституции|FELONY|Ввоз людей с целью сексуальной эксплуатации. До 10 лет.|https://www.law.cornell.edu/uscode/text/8/1328
+USC|16|§ 3|Нарушение правил в нац. парках|MISDEMEANOR|Костры, охота, рыбалка и иные нарушения на землях NPS. До 6 месяцев.|https://www.law.cornell.edu/uscode/text/16/3
+USC|16|§ 117|Незаконная охота и рыболовство|MISDEMEANOR|Незаконная охота или рыбалка на землях NPS. До 6 месяцев.|https://www.law.cornell.edu/uscode/text/16/117
+USC|16|§ 403|Нарушение правил в исторических местах|MISDEMEANOR|Вандализм, кража или иные нарушения в национальных исторических зонах. До 6 месяцев.|https://www.law.cornell.edu/uscode/text/16/403
+USC|16|§ 470ee|Торговля археологическими объектами|WOBBLER|Изъятие/продажа/транспортировка археологических находок без разрешения. До 1 года, до 2 лет при отягчающих обстоятельствах.|https://www.law.cornell.edu/uscode/text/16/470ee
+USC|16|§ 668|Закон о защите белоголового орлана|MISDEMEANOR|Запрещена охота, владение или торговля белоголовыми орланами/частями их тел. До 1 года, штраф до $100,000.|https://www.law.cornell.edu/uscode/text/16/668
+USC|18|§ 111|Нападение на федерального служащего|FELONY|Нападение/сопротивление/угрозы при исполнении: простое — до 1 года; при вреде/оружии — до 8–20 лет.|https://www.law.cornell.edu/uscode/text/18/111
+USC|18|§ 201|Взяточничество должностных лиц|FELONY|Дача/получение взятки для влияния на действия должностного лица. До 15 лет, штраф до $250,000.|https://www.law.cornell.edu/uscode/text/18/201
+USC|18|§ 210|Подкуп свидетеля|FELONY|Предложение ценностей для влияния на показания. До 2 лет.|https://www.law.cornell.edu/uscode/text/18/210
+USC|18|§ 211|Взятка, полученная свидетелем|FELONY|Получение/требование вознаграждения за изменение показаний. До 2 лет.|https://www.law.cornell.edu/uscode/text/18/211
+USC|18|§ 471|Подделка валюты США|FELONY|Изготовление/подделка денежных знаков. До 20 лет.|https://www.law.cornell.edu/uscode/text/18/471
+USC|18|§ 472|Сбыт поддельной валюты|FELONY|Сбыт/хранение/использование подделок с намерением обмана. До 20 лет.|https://www.law.cornell.edu/uscode/text/18/472
+USC|18|§ 473|Сделки с поддельной валютой|FELONY|Покупка/продажа/обмен поддельных знаков. До 20 лет.|https://www.law.cornell.edu/uscode/text/18/473
+USC|18|§ 474|Инструменты для подделки|FELONY|Изготовление/владение оборудованием для подделки. До 20 лет.|https://www.law.cornell.edu/uscode/text/18/474
+USC|18|§ 478|Подделка иностранных ц/б|FELONY|Изготовление/сбыт поддельных иностранных валют/облигаций. До 20 лет.|https://www.law.cornell.edu/uscode/text/18/478
+USC|18|§ 541|Ввоз контрабанды|FELONY|Умышленный ввоз товаров в обход таможенных правил. До 2 лет.|https://www.law.cornell.edu/uscode/text/18/541
+USC|18|§ 542|Ложные заявления при импорте|FELONY|Поддельные документы/маркировка при ввозе. До 2 лет.|https://www.law.cornell.edu/uscode/text/18/542
+USC|18|§ 543|Ввоз запрещённых товаров|FELONY|Импорт товаров, запрещённых законом. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/543
+USC|18|§ 545|Контрабанда товаров|FELONY|Сокрытие, незаконный ввоз/вывоз, хранение контрабанды. До 20 лет.|https://www.law.cornell.edu/uscode/text/18/545
+USC|18|§ 546|Контрабанда из свободных зон|FELONY|Вывоз из FTZ без пошлин/с нарушением. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/546
+USC|18|§ 553|Контрабанда транспортных средств|FELONY|Незаконный ввоз/вывоз ТС. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/553
+USC|18|§ 554|Содействие контрабанде|FELONY|Помощь в продаже/укрывательстве/перевозке контрабанды. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/554
+USC|18|§ 641|Хищение федерального имущества|WOBBLER|Кража/присвоение/продажа имущества США: >$1,000 — до 10 лет; ≤$1,000 — до 1 года.|https://www.law.cornell.edu/uscode/text/18/641
+USC|18|§ 642|Поддельные документы для хищения|FELONY|Использование поддельных документов для хищения имущества США. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/642
+USC|18|§ 659|Хищение межштатного груза|FELONY|Кража/присвоение грузов в межштатной торговле (ж/д, авиа, порты). До 10 лет.|https://www.law.cornell.edu/uscode/text/18/659
+USC|18|§ 661|Хищение на море|FELONY|Кража/хищение в морской юрисдикции США. До 5 лет.|https://www.law.cornell.edu/uscode/text/18/661
+USC|18|§ 662|Скупка похищенного федерального имущества|FELONY|Покупка/получение заведомо похищенного имущества США. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/662
+USC|18|§ 666|Хищение в программах с федеральным финансированием|FELONY|Хищение/взятки в организациях, получающих федеральные средства (>$5,000). До 10 лет.|https://www.law.cornell.edu/uscode/text/18/666
+USC|18|§ 709|Незаконное использование названий федеральных ведомств|WOBBLER|Любое лицо, которое умышленно использует или имитирует название, аббревиатуру, печать, эмблему или инсигнию федерального департамента или агентства без надлежащего разрешения, любым способом, который может разумно быть истолкован как представляющий одобрение или действие от имени правительства США, является виновным в данном правонарушении. Наказание: MIS - Лишение свободы на срок до 1 года и/или штраф до $100,000. FEL - Лишение свободы на срок до 3 лет и/или штраф до $250,000.|https://www.law.cornell.edu/uscode/text/18/709
+USC|18|§ 751|Побег из-под стражи|WOBBLER|Побег из федеральной тюрьмы или от USMS. До 5 лет (misdemeanor при лёгких случаях), до 10 лет при тяжком преступлении.|https://www.law.cornell.edu/uscode/text/18/751
+USC|18|§ 752|Помощь в побеге|WOBBLER|Содействие побегу заключённого или арестованного. До 5 лет (misdemeanor), до 10 лет при тяжких обстоятельствах.|https://www.law.cornell.edu/uscode/text/18/752
+USC|18|§ 792|Укрывательство шпионов|FELONY|Умышленное укрывательство/помощь шпионам против США. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/792
+USC|18|§ 793|Сбор/передача секретной информации|FELONY|Незаконное хранение/сбор/передача данных обороны. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/793
+USC|18|§ 794|Шпионаж в пользу иностранного государства|FELONY|Передача секретов иностранным государствам. Пожизненно или смертная казнь.|https://www.law.cornell.edu/uscode/text/18/794
+USC|18|§ 795|Фотографирование оборонных объектов|WOBBLER|Съёмка/зарисовка военных объектов без разрешения: до 1 года; при вреде — до 7 лет.|https://www.law.cornell.edu/uscode/text/18/795
+USC|18|§ 796|Использование летательных аппаратов для шпионажа|FELONY|Сбор военных данных с воздуха (в т.ч. БПЛА). До 10 лет.|https://www.law.cornell.edu/uscode/text/18/796
+USC|18|§ 797|Публикация секретных материалов|WOBBLER|Публикация фото/схем военных объектов: до 1 года; при умысле — до 10 лет.|https://www.law.cornell.edu/uscode/text/18/797
+USC|18|§ 798|Разглашение секретной инф. связи|FELONY|Разглашение сведений о кодах/шифрах/системах связи США. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/798
+USC|18|§ 799|Нарушение правил секретных объектов|MISDEMEANOR|Несанкционированное проникновение на охраняемые объекты (NASA и др.). До 1 года.|https://www.law.cornell.edu/uscode/text/18/799
+USC|18|§ 844|Преступления со взрывчатыми веществами|FELONY|Незаконное производство/хранение/перевозка/использование ВВ: до 10 лет; при жертвах — до пожизненного.|https://www.law.cornell.edu/uscode/text/18/844
+USC|18|§ 912|Выдача себя за федерального служащего или агента|FELONY|Любое лицо, которое намеренно выдает себя за офицера или сотрудника Соединенных Штатов и действует под видом такого офицера или сотрудника, либо требует или пытается получить под этим предлогом какой-либо акт, привилегию или право, является виновным в данном правонарушении. Наказание: Лишение свободы до 3 лет и/или штраф до $250,000.|https://www.law.cornell.edu/uscode/text/18/912
+USC|18|§ 921|Определения для огнестрельного оружия|INFO|Термины: «огнестрельное оружие», «лицензированный дилер», «боеприпасы», «разрушительное устройство».|https://www.law.cornell.edu/uscode/text/18/921
+USC|18|§ 922|Нелегальный оборот оружия / WMD|FELONY|Производство/сбыт/владение оружием запрещёнными лицами, межштатные нарушения. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/922
+USC|18|§ 923|Лицензирование дилеров оружия|INFO|Требования к лицензированию производителей, импортеров и продавцов оружия.|https://www.law.cornell.edu/uscode/text/18/923
+USC|18|§ 924|Наказания за преступления с оружием|FELONY|Доп. сроки за использование/ношение при тяжком преступлении/наркосбыте: от 5 лет до пожизненного (пулемёт/глушитель).|https://www.law.cornell.edu/uscode/text/18/924
+USC|18|§ 929|Использование бронебойных боеприпасов|FELONY|Применение бронебойных патронов при тяжком преступлении: дополнительно +5 лет.|https://www.law.cornell.edu/uscode/text/18/929
+USC|18|§ 930|Оружие в федеральных зданиях|WOBBLER|Ношение/хранение оружия в судах и охраняемых зданиях: до 1 года; при отягч. — до 5 лет.|https://www.law.cornell.edu/uscode/text/18/930
+USC|18|§ 1001|Ложные заявления|FELONY|Умышленное предоставление ложных сведений федеральным органам. До 5 лет; до 8 лет при связи с терроризмом.|https://www.law.cornell.edu/uscode/text/18/1001
+USC|18|§ 1002|Финансовое мошенничество|FELONY|Подделка или использование изменённых чеков, выданных от имени США. До 5 лет.|https://www.law.cornell.edu/uscode/text/18/1002
+USC|18|§ 1005|Фальсификация банковских записей|FELONY|Подделка документов федеральных банков. До 30 лет, штраф до $1,000,000.|https://www.law.cornell.edu/uscode/text/18/1005
+USC|18|§ 1006|Мошенничество с кредитными учреждениями|FELONY|Ложные записи или обман федеральных кредитных ассоциаций. До 30 лет.|https://www.law.cornell.edu/uscode/text/18/1006
+USC|18|§ 1014|Мошенничество с ипотекой и кредитами|FELONY|Ложные заявления для получения кредитов/ипотек от федеральных учреждений. До 30 лет.|https://www.law.cornell.edu/uscode/text/18/1014
+USC|18|§ 1028|Мошенничество с идентификацией|FELONY|Подделка/использование/кража личных данных (паспорта, ID). До 5 лет; при терроризме — до 15 лет.|https://www.law.cornell.edu/uscode/text/18/1028
+USC|18|§ 1028(a)|Отягчённая кража личности|FELONY|Использование чужой личности при тяжком преступлении. Дополнительно +2 года к сроку.|https://www.law.cornell.edu/uscode/text/18/1028A
+USC|18|§ 1029|Мошенничество с кредитными картами|FELONY|Подделка, использование или сбыт кредитных карт. До 10 лет; до 20 при связях с терроризмом.|https://www.law.cornell.edu/uscode/text/18/1029
+USC|18|§ 1030|Компьютерное мошенничество (CFAA)|FELONY|Несанкционированный доступ к компьютерам/сетям (банки, госструктуры). От штрафов и 1 года до пожизненного при жертвах.|https://www.law.cornell.edu/uscode/text/18/1030
+USC|18|§ 1361|Повреждение федерального имущества|WOBBLER|Умышленное повреждение или уничтожение имущества США. Ущерб ≤ $1,000 — до 1 года; > $1,000 — до 10 лет.|https://www.law.cornell.edu/uscode/text/18/1361
+USC|18|§ 1362|Повреждение коммуникаций США|FELONY|Уничтожение или порча линий связи/оборудования, принадлежащего правительству. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/1362
+USC|18|§ 1363|Уничтожение зданий на федеральных землях|FELONY|Поджог, взрыв или уничтожение строений на федеральных территориях. До 20 лет.|https://www.law.cornell.edu/uscode/text/18/1363
+USC|18|§ 1369|Вандализм национальных мемориалов|WOBBLER|Вандализм или осквернение военных памятников. До 10 лет, при ущербе < $1,000 — до 1 года.|https://www.law.cornell.edu/uscode/text/18/1369
+USC|18|§ 1501|Сопротивление исполнению судебного приказа|MISDEMEANOR|Умышленное воспрепятствование исполнению судебных ордеров. До 1 года, штраф до $100,000.|https://www.law.cornell.edu/uscode/text/18/1501
+USC|18|§ 1503|Воспрепятствование правосудию|FELONY|Влияние на судей, присяжных или свидетелей, угроза суду. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/1503
+USC|18|§ 1505|Воспрепятствование расследованию|FELONY|Препятствие расследованиям или административным процессам. До 5 лет; при терроризме — до 8 лет.|https://www.law.cornell.edu/uscode/text/18/1505
+USC|18|§ 1507|Пикетирование или демонстрации возле суда|MISDEMEANOR|Запрещены демонстрации, которые мешают работе судов и присяжных. До 1 года.|https://www.law.cornell.edu/uscode/text/18/1507
+USC|18|§ 1512|Давление на свидетелей|FELONY|Запугивание, угрозы или насилие с целью повлиять на показания. До 20 лет; пожизненное при убийстве.|https://www.law.cornell.edu/uscode/text/18/1512
+USC|18|§ 1513|Месть свидетелям|FELONY|Угрозы, нападения или убийство свидетелей за сотрудничество. До 20 лет; пожизненное при убийстве.|https://www.law.cornell.edu/uscode/text/18/1513
+USC|18|§ 1581|Порабощение|FELONY|Удержание человека в рабстве или принудительном труде. До 20 лет; пожизненное при жертвах.|https://www.law.cornell.edu/uscode/text/18/1581
+USC|18|§ 1584|Продажа в рабство|FELONY|Продажа или удержание лиц для эксплуатации. До 20 лет; пожизненное при тяжких последствиях.|https://www.law.cornell.edu/uscode/text/18/1584
+USC|18|§ 1589|Принудительный труд|FELONY|Принуждение к труду угрозами/обманом/насилием. До 20 лет; пожизненное при похищении или смерти.|https://www.law.cornell.edu/uscode/text/18/1589
+USC|18|§ 1590|Торговля людьми|FELONY|Вербовка/перевозка/укрывательство лиц для рабства или проституции. До 20 лет; пожизненное при тяжких последствиях.|https://www.law.cornell.edu/uscode/text/18/1590
+USC|18|§ 1591|Сексуальная эксплуатация людей|FELONY|Вовлечение несовершеннолетних (<18 лет) или взрослых в секс-торговлю. Минимум 15 лет, максимум пожизненное.|https://www.law.cornell.edu/uscode/text/18/1591
+USC|18|§ 1864|Опасные вещества на федеральных землях|FELONY|Применение ядов/взрывчатки и др. опасных веществ, угрожающих людям/природе. До 5 лет, штраф до $250,000.|https://www.law.cornell.edu/uscode/text/18/1864
+USC|18|§ 1865|Природоохранные правила на федеральных землях|MISDEMEANOR|Незаконная вырубка/добыча ресурсов, иные нарушения правил охраны. До 6 месяцев.|https://www.law.cornell.edu/uscode/text/18/1865
+USC|18|§ 1951|Вымогательство (Закон Хоббса)|FELONY|Вымогательство с угрозами/насилием, влияющее на межштатную торговлю. До 20 лет.|https://www.law.cornell.edu/uscode/text/18/1951
+USC|18|§ 1952|Незаконная деятельность через межштатные каналы|FELONY|Использование транспорта/связи для нелегальной деятельности (проституция, наркотики, азартные игры). До 5 лет, при отягч. — до 20 лет.|https://www.law.cornell.edu/uscode/text/18/1952
+USC|18|§ 1956|Отмывание денег|FELONY|Финансовые операции для сокрытия происхождения преступных доходов. До 20 лет, штраф до $500,000 или двойной суммы.|https://www.law.cornell.edu/uscode/text/18/1956
+USC|18|§ 1957|Финансовые операции с незаконными средствами|FELONY|Сделки на сумму > $10,000 с преступными доходами. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/1957
+USC|18|§ 1961|Определения (RICO)|INFO|Термины: «рэкетирская деятельность», «предприятие» и др.|https://www.law.cornell.edu/uscode/text/18/1961
+USC|18|§ 1962|Запрещённая деятельность (RICO)|FELONY|Участие в предприятиях через рэкет (шантаж, убийства, наркотики). До 20 лет; пожизненное при убийствах.|https://www.law.cornell.edu/uscode/text/18/1962
+USC|18|§ 1963|Наказания (RICO)|FELONY|Конфискация имущества, полученного от рэкета, плюс до 20 лет тюрьмы, штраф до $250,000.|https://www.law.cornell.edu/uscode/text/18/1963
+USC|18|§ 2113|Ограбление банков|FELONY|Ограбление/попытка ограбления федеральных банков и кредитных учреждений. До 20 лет, при жертвах — пожизненное.|https://www.law.cornell.edu/uscode/text/18/2113
+USC|18|§ 2331|Определения (антитеррор)|INFO|Термины: «терроризм», «международный/внутренний терроризм», «ОМП».|https://www.law.cornell.edu/uscode/text/18/2331
+USC|18|§ 2332(a)|Оружие массового поражения|FELONY|Производство/хранение/применение хим./био./ядерного ОМП. До пожизненного/смертная казнь.|https://www.law.cornell.edu/uscode/text/18/2332a
+USC|18|§ 2332(b)|Терроризм вне границ штатов/США|FELONY|Акты терроризма, затрагивающие межштатные/международные интересы. До пожизненного.|https://www.law.cornell.edu/uscode/text/18/2332b
+USC|18|§ 2332(f)|Взрывы в общественных местах|FELONY|Взрывы на транспорте, в зданиях, на инфраструктуре. До пожизненного.|https://www.law.cornell.edu/uscode/text/18/2332f
+USC|18|§ 2332(h)|Радиологическое оружие|FELONY|Производство, хранение или угроза применения радиологического оружия. До пожизненного заключения.|https://www.law.cornell.edu/uscode/text/18/2332h
+USC|18|§ 2339(a)|Материальная поддержка терроризма|FELONY|Предоставление оружия, денег, убежища или иной помощи для террористических актов. До 15 лет, при жертвах — пожизненное.|https://www.law.cornell.edu/uscode/text/18/2339A
+USC|18|§ 2339(b)|Поддержка террористических организаций|FELONY|Сотрудничество с организациями, признанными террористическими. До 20 лет, при жертвах — пожизненное.|https://www.law.cornell.edu/uscode/text/18/2339B
+USC|18|§ 2339(c)|Финансирование терроризма|FELONY|Сбор или предоставление средств для террористических актов. До 20 лет.|https://www.law.cornell.edu/uscode/text/18/2339C
+USC|18|§ 2339(d)|Обучение у террористической организации|FELONY|Получение инструктажа или тренировок у террористических структур. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/2339D
+USC|18|§ 2381|Измена|FELONY|Участие в войне против США или помощь врагам. Смертная казнь или ≥ 5 лет тюрьмы + штраф до $250,000, лишение права на госслужбу.|https://www.law.cornell.edu/uscode/text/18/2381
+USC|18|§ 2382|Сокрытие измены|FELONY|Умышленное сокрытие сведений об измене. До 7 лет.|https://www.law.cornell.edu/uscode/text/18/2382
+USC|18|§ 2383|Мятеж или восстание|FELONY|Организация/участие/подстрекательство к мятежу против власти США. До 10 лет, штраф, запрет на госслужбу.|https://www.law.cornell.edu/uscode/text/18/2383
+USC|18|§ 2384|Заговор с целью мятежа|FELONY|Сговор для свержения правительства или воспрепятствования исполнению законов. До 20 лет.|https://www.law.cornell.edu/uscode/text/18/2384
+USC|18|§ 2385|Пропаганда свержения правительства|FELONY|Призывы, обучение или пропаганда насильственного свержения власти. До 20 лет, штраф, запрет на госслужбу.|https://www.law.cornell.edu/uscode/text/18/2385
+USC|18|§ 2387|Подстрекательство в армии|FELONY|Подстрекательство военнослужащих к мятежу, неподчинению или дезертирству. До 10 лет.|https://www.law.cornell.edu/uscode/text/18/2387
+USC|18|§ 2389|Набор в иностранные вооружённые силы|FELONY|Вербовка граждан США в армию враждебного государства. До 3 лет.|https://www.law.cornell.edu/uscode/text/18/2389
+USC|18|§ 2511|Перехват и раскрытие телефонных, устных или электронных коммуникаций|FELONY|Умышленный перехват, использование или разглашение содержания телефонных, радиосвязных либо иных электронных сообщений без законного разрешения. Наказание: до 5 лет лишения свободы и штраф до 250 000 USD.|https://www.law.cornell.edu/uscode/text/18/2511
+USC|21|§ 802|Определения (контролируемые вещества)|INFO|Термины: «контролируемое вещество», «распространение», «производство», «прекурсор».|https://www.law.cornell.edu/uscode/text/21/802
+USC|21|§ 841|Крупный наркотрафик (импорт, межштатный оборот)|FELONY|Производство/сбыт/хранение с целью сбыта; наказание по количеству: от 0–20 лет до пожизненного.|https://www.law.cornell.edu/uscode/text/21/841
+USC|21|§ 842|Нарушение правил обращения наркотиков|WOBBLER|Нарушения учёта/маркировки/хранения: обычно до 1 года; при умысле — до 4 лет.|https://www.law.cornell.edu/uscode/text/21/842
+USC|21|§ 843|Мошенничество с рецептами|FELONY|Подделка/использование фиктивных рецептов, незаконная реклама. До 4 лет.|https://www.law.cornell.edu/uscode/text/21/843
+USC|21|§ 844|Незаконное хранение|WOBBLER|Простое хранение без рецепта: до 1 года; при повторе — до 2 лет; отягчающие — выше.|https://www.law.cornell.edu/uscode/text/21/844
+USC|21|§ 848|Постоянное преступное предприятие (CCE)|FELONY|Руководство наркосетью (5+ лиц, значительный доход). 20 лет–пожизненно.|https://www.law.cornell.edu/uscode/text/21/848
+USC|21|§ 856|Поддержание наркопритона|FELONY|Владение/аренда помещений для производства/сбыта. До 20 лет (штрафы возможны до $500,000).|https://www.law.cornell.edu/uscode/text/21/856
+USC|21|§ 858|Опасное производство|FELONY|Производство, создающее угрозу жизни/экологии (напр., «кухни» метамфетамина). До 10 лет.|https://www.law.cornell.edu/uscode/text/21/858
+USC|21|§ 860|Сбыт возле школ|FELONY|Сбыт/производство вблизи школ/детучреждений. Наказание удваивается относительно § 841.|https://www.law.cornell.edu/uscode/text/21/860
+USC|21|§ 861|Использование несовершеннолетних|FELONY|Вовлечение <18 лет в производство/сбыт; удвоенные сроки.|https://www.law.cornell.edu/uscode/text/21/861
+USC|21|§ 863|Принадлежности для наркотиков|FELONY|Производство/сбыт «параферналии». До 3 лет.|https://www.law.cornell.edu/uscode/text/21/863
+USC|21|§ 864|Прекурсоры|FELONY|Владение/сбыт/хищение химикатов для производства наркотиков. До 20 лет.|https://www.law.cornell.edu/uscode/text/21/864
+USC|21|§ 952|Импорт наркотиков|FELONY|Незаконный ввоз контролируемых веществ: санкции по количеству, до пожизненного.|https://www.law.cornell.edu/uscode/text/21/952
+USC|21|§ 953|Экспорт наркотиков|FELONY|Незаконный вывоз контролируемых веществ. Наказание аналогично § 952.|https://www.law.cornell.edu/uscode/text/21/953
+USC|26|§ 5841|Регистрация оружия (NFA)|INFO|Национальный реестр огнестрельного оружия: учёт пулемётов, глушителей и др.|https://www.law.cornell.edu/uscode/text/26/5841
+USC|26|§ 5861|Незаконное владение незарегистрированным оружием|FELONY|Производство/владение/сбыт оружия, подлежащего регистрации по NFA, без учёта. До 10 лет.|https://www.law.cornell.edu/uscode/text/26/5861
+USC|49|§ 46314|Незаконное проникновение на борт воздушного судна или в зону аэропорта|WOBBLER|Умышленное проникновение в самолёт или охраняемую зону аэропорта в нарушение требований авиационной безопасности. До 1 года; Если с умыслом уклониться от процедур досмотра, либо совершить тяжкое преступление на борту или в зоне аэропорта — до 10 лет.|https://www.law.cornell.edu/uscode/text/49/46314`;
+
+    // --------------------------------------------------------------
+    // Парсер
+    // --------------------------------------------------------------
+    const laws = rawData.trim().split('\n').filter(line => line).map(line => {
+        const p = line.split('|');
+        return {
+            code: p[0],
+            section: p[1] || "—",
+            number: p[2],
+            title: p[3],
+            type: p[4],
+            desc: p[5] || "",
+            link: p[6] || "#"
+        };
+    });
+
+    // --------------------------------------------------------------
+    // Рендер
+    // --------------------------------------------------------------
+    const tbody = document.getElementById('tableBody');
+    const searchInput = document.getElementById('searchInput');
+    const filterBtns = document.querySelectorAll('.filter-group .btn-rounded');
+    const clearBtn = document.getElementById('clearFilters');
+    const rowCount = document.getElementById('rowCount');
+    const filterHint = document.getElementById('filterHint');
+    const cardsView = document.getElementById('cardsView');
+    const tableWrapper = document.getElementById('tableWrapper');
+    const viewTableBtn = document.getElementById('viewTable');
+    const viewCardsBtn = document.getElementById('viewCards');
+    const autocompleteList = document.getElementById('autocompleteList');
+
+    let currentFilter = 'all';
+    let currentSearch = '';
+    let currentView = 'table';
+    let sortField = '';
+    let sortOrder = 'asc';
+
+    // Автодополнение
+    function showAutocomplete(query) {
+        if (!query || query.length < 1) {
+            autocompleteList.classList.remove('show');
+            return;
+        }
+        const q = query.toLowerCase();
+        const matches = laws.filter(item => 
+            item.title.toLowerCase().includes(q) || 
+            item.code.toLowerCase().includes(q) ||
+            item.number.toLowerCase().includes(q)
+        ).slice(0, 8);
+
+        if (matches.length === 0) {
+            autocompleteList.classList.remove('show');
+            return;
+        }
+
+        let html = '';
+        matches.forEach(item => {
+            const highlightedTitle = highlightText(item.title, query);
+            html += `<div class="autocomplete-item" data-value="${item.code} ${item.number}">${highlightedTitle}</div>`;
+        });
+        autocompleteList.innerHTML = html;
+        autocompleteList.classList.add('show');
+
+        autocompleteList.querySelectorAll('.autocomplete-item').forEach(el => {
+            el.addEventListener('click', function() {
+                searchInput.value = this.textContent;
+                currentSearch = this.textContent;
+                autocompleteList.classList.remove('show');
+                renderTable();
+            });
+        });
+    }
+
+    searchInput.addEventListener('input', function() {
+        currentSearch = this.value;
+        showAutocomplete(this.value);
+        renderTable();
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-wrap')) {
+            autocompleteList.classList.remove('show');
+        }
+    });
+
+    // Виды отображения
+    viewTableBtn.addEventListener('click', function() {
+        viewTableBtn.classList.add('active');
+        viewCardsBtn.classList.remove('active');
+        currentView = 'table';
+        tableWrapper.classList.remove('hidden');
+        cardsView.classList.remove('show');
+        renderTable();
+    });
+
+    viewCardsBtn.addEventListener('click', function() {
+        viewCardsBtn.classList.add('active');
+        viewTableBtn.classList.remove('active');
+        currentView = 'cards';
+        tableWrapper.classList.add('hidden');
+        cardsView.classList.add('show');
+        renderTable();
+    });
+
+    // Сортировка
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', function() {
+            const field = this.dataset.sort;
+            if (sortField === field) {
+                sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortField = field;
+                sortOrder = 'asc';
+            }
+            document.querySelectorAll('th[data-sort]').forEach(h => h.classList.remove('sorted', 'sorted-asc', 'sorted-desc'));
+            this.classList.add('sorted', `sorted-${sortOrder}`);
+            renderTable();
+        });
+    });
+
+    function highlightText(text, query) {
+        if (!query || query.trim() === '') return text;
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    function renderTable() {
+        let filtered = laws.filter(item => {
+            if (currentFilter !== 'all' && item.type !== currentFilter) return false;
+            if (currentSearch.trim() !== '') {
+                const q = currentSearch.trim().toLowerCase();
+                const inTitle = item.title.toLowerCase().includes(q);
+                const inDesc = item.desc.toLowerCase().includes(q);
+                const inNumber = item.number.toLowerCase().includes(q);
+                const inCode = item.code.toLowerCase().includes(q);
+                const inSection = item.section.toLowerCase().includes(q);
+                if (!(inTitle || inDesc || inNumber || inCode || inSection)) return false;
+            }
+            return true;
+        });
+
+        if (sortField) {
+            filtered.sort((a, b) => {
+                let valA = a[sortField] || '';
+                let valB = b[sortField] || '';
+                if (sortField === 'number') {
+                    valA = parseFloat(valA.replace(/[^0-9.]/g, '')) || 0;
+                    valB = parseFloat(valB.replace(/[^0-9.]/g, '')) || 0;
+                } else {
+                    valA = valA.toString().toLowerCase();
+                    valB = valB.toString().toLowerCase();
+                }
+                if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+                if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        if (filtered.length === 0) {
+            const emptyMsg = `<div class="empty-state">Ничего не найдено по вашему запросу</div>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Ничего не найдено по вашему запросу</td></tr>`;
+            cardsView.innerHTML = emptyMsg;
+            rowCount.textContent = 'Записей: 0';
+            filterHint.textContent = 'Нет совпадений';
+            return;
+        }
+
+        const query = currentSearch.trim();
+
+        // Таблица
+        let tableHtml = '';
+        filtered.forEach((item, index) => {
+            const typeClass = item.type.toLowerCase();
+            const delay = Math.min(index * 25, 300);
+            
+            tableHtml += `<tr class="row-animate" style="animation-delay: ${delay}ms">
+                <td class="code-cell">${query ? highlightText(item.code, query) : item.code}</td>
+                <td>${query ? highlightText(item.section, query) : item.section}</td>
+                <td><strong>${query ? highlightText(item.number, query) : item.number}</strong></td>
+                <td>${query ? highlightText(item.title, query) : item.title}</td>
+                <td><span class="type-badge ${typeClass}">${item.type}</span></td>
+                <td>${query ? highlightText(item.desc, query) : item.desc}</td>
+                <td class="action-cell"><a href="${item.link}" target="_blank">Перейти</a></td>
+            </tr>`;
+        });
+        tbody.innerHTML = tableHtml;
+
+        // Карточки
+        let cardsHtml = '';
+        filtered.forEach((item, index) => {
+            const typeClass = item.type.toLowerCase();
+            const delay = Math.min(index * 25, 300);
+            cardsHtml += `
+                <div class="law-card" style="animation-delay: ${delay}ms">
+                    <div class="card-header">
+                        <span class="card-code">${item.code} ${item.number}</span>
+                        <span class="type-badge ${typeClass}">${item.type}</span>
+                    </div>
+                    <div class="card-title">${query ? highlightText(item.title, query) : item.title}</div>
+                    <div class="card-desc">${query ? highlightText(item.desc, query) : item.desc}</div>
+                    <div class="card-footer">
+                        <span style="font-size:0.8rem;color:var(--text-muted);">${item.section}</span>
+                        <a href="${item.link}" target="_blank" style="color:#3a6b8f;text-decoration:none;font-weight:500;">Подробнее →</a>
+                    </div>
+                </div>
+            `;
+        });
+        cardsView.innerHTML = cardsHtml;
+
+        rowCount.textContent = `Записей: ${filtered.length}`;
+        filterHint.textContent = currentFilter === 'all' ? 'Показаны все' : `Фильтр: ${currentFilter}`;
+    }
+
+    // Фильтры
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.type;
+            renderTable();
+        });
+    });
+
+    clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        currentSearch = '';
+        autocompleteList.classList.remove('show');
+        filterBtns.forEach(b => b.classList.remove('active'));
+        document.querySelector('.filter-group .btn-rounded[data-type="all"]').classList.add('active');
+        currentFilter = 'all';
+        renderTable();
+    });
+
+    // Кнопка "Наверх"
+    const backToTopBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 300) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    });
+    backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Тёмная тема
+    const themeToggle = document.getElementById('themeToggle');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function setTheme(isDark) {
+        if (isDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = 'Светлая';
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            themeToggle.textContent = 'Тёмная';
+        }
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        setTheme(savedTheme === 'dark');
+    } else {
+        setTheme(prefersDark.matches);
+    }
+
+    prefersDark.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            setTheme(e.matches);
+        }
+    });
+
+    themeToggle.addEventListener('click', function() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        setTheme(!isDark);
+    });
+
+    renderTable();
+</script>
+</body>
+</html>
